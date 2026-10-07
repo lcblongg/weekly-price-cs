@@ -87,7 +87,9 @@ GITHUB_WORKFLOW_REF=main
 
 Token GitHub chỉ cấp repository này và quyền **Actions: write**, Metadata: read;
 không đưa token/service key vào biến `NEXT_PUBLIC_*`. Vercel chỉ xác thực/dispatch/đọc DB;
-Python và Chromium chạy trên GitHub runner, không chạy trong Vercel Function.
+Python và Chromium chạy trên GitHub runner, không chạy trong Vercel Function. API bảng giá phân trang
+dưới 3,5 MB/phản hồi để đáp ứng [giới hạn payload Vercel](https://vercel.com/docs/functions/limitations);
+client tải đủ các trang, kiểm tra generation nhất quán trước khi hiển thị/xuất Excel.
 Dùng tên miền Vercel thực cấp, không cam kết `weekly-price-cs.vercel.app` còn khả dụng.
 Trong Supabase Auth → URL Configuration đặt Site URL là domain thực. Vercel [Hobby](https://vercel.com/docs/plans/hobby) chỉ dành cho cá nhân, phi thương mại;
 cần gói phù hợp cho việc dùng nội bộ doanh nghiệp hoặc lựa chọn hosting khác.

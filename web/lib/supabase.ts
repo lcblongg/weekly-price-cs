@@ -4,6 +4,7 @@ import {addDays} from './calendar';
 import {validateRows} from './prices';
 import {validateIssues} from './issues';
 import type {DailyPrice,ScrapeIssue} from './types';
+import {loadComparison} from './load-comparison';
 import {quoteDay,type Quote} from './comparison';
 let client:SupabaseClient|undefined;
 export function supabase() {
@@ -21,9 +22,7 @@ export async function loadWeek(start:string,signal:AbortSignal):Promise<DailyPri
       if(process.env.NEXT_PUBLIC_DATA_MODE!=='live')return rows;
       // Lịch sử dùng cùng phạm vi màu đã xác minh với bảng so sánh; DB vẫn giữ đủ màu nguồn.
       const {data:{session}}=await supabase().auth.getSession();
-      const response=await fetch('/api/comparison?start='+start,{signal,headers:{Authorization:'Bearer '+(session?.access_token??'')}});
-      if(!response.ok)throw new Error('Không tải được phạm vi màu đã xác minh cho lịch sử.');
-      const snapshot=await response.json();
+      const snapshot=await loadComparison<{rows:Quote[]}>(start,signal,(url,init)=>fetch(url,{...init,headers:{Authorization:'Bearer '+(session?.access_token??'')}}));
       const chains:Record<string,string>={MW:'TGDD',CPS:'CellphoneS',FPT:'FPT Shop',VIETTEL:'Viettel Store',PV:'Phong Vũ'};
       const allowed=new Set((snapshot.rows as Quote[]).map(r=>JSON.stringify([chains[r.chain],r.sku,quoteDay(r)])));
       return rows.filter(r=>allowed.has(JSON.stringify([r.chain_name,r.sku,r.business_date])));
