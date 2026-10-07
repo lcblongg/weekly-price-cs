@@ -36,3 +36,12 @@ class CloudWorkerTests(unittest.TestCase):
    with patch.object(cw,'run') as run:
     with self.assertRaises(PipelineError):cw.work(MagicMock(),{'id':'job','kind':'daily_prices','payload':payload},self.settings())
     run.assert_not_called()
+
+ def test_checking_one_model_preserves_other_model_url_results(self):
+  db=MagicMock();settings=self.settings();settings['apple_url_checks']={'value':{'rules':{'Other':{'model':'Other','color':'Đen'}},'statuses':{'Other':[{'status':'valid','url':'https://example/old'}]}}}
+  outputs=[SimpleNamespace(stdout=json.dumps({'ok':True,'results':[]}),returncode=0),SimpleNamespace(stdout=json.dumps({'statuses':{'Other':[{'status':'unchecked'}],'iPhone 17 Pro Max':[{'status':'valid'}]}}),returncode=0)]
+  with patch.object(cw,'run',side_effect=outputs):
+   result,status=cw.work(db,{'id':'job','kind':'check_urls','payload':{'model':'iPhone 17 Pro Max'}},settings)
+  saved=db.table.return_value.upsert.call_args.args[0]['value']
+  self.assertEqual(status,'success');self.assertEqual(saved['statuses']['Other'][0]['status'],'valid')
+  self.assertEqual(saved['rules']['iPhone 17 Pro Max']['color'],None)

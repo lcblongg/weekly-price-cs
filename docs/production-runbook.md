@@ -67,7 +67,7 @@ chung; không chạy một bản local công bố vào DB sản xuất ngoài h�
 GitHub schedule là lịch chạy dự kiến, có thể trễ. Cào toàn catalog thường tốn hàng giờ; kiểm tra
 phút Actions còn lại của tài khoản trước khi bật hằng ngày. Nếu cần tiết kiệm quota repository private,
 thiết lập self-hosted runner và variable `RUNNER_LABELS=["self-hosted","macOS","ARM64"]` (hoặc nhãn
-thực của runner). Máy runner phải bật/online vào giờ chạy. Không cam kết toàn bộ hệ thống miễn phí
+thực của runner). Máy runner phải bật/online vào giờ chạy. Xem [billing GitHub Actions](https://docs.github.com/en/actions/concepts/billing-and-usage). Không cam kết toàn bộ hệ thống miễn phí
 nếu giới hạn gói đang dùng không đáp ứng lượt cào.
 
 ## 3. Vercel
@@ -89,8 +89,8 @@ Token GitHub chỉ cấp repository này và quyền **Actions: write**, Metadat
 không đưa token/service key vào biến `NEXT_PUBLIC_*`. Vercel chỉ xác thực/dispatch/đọc DB;
 Python và Chromium chạy trên GitHub runner, không chạy trong Vercel Function.
 Dùng tên miền Vercel thực cấp, không cam kết `weekly-price-cs.vercel.app` còn khả dụng.
-Trong Supabase Auth → URL Configuration đặt Site URL là domain thực. Kiểm tra điều kiện gói
-Vercel phù hợp việc dùng nội bộ doanh nghiệp trước khi chọn gói.
+Trong Supabase Auth → URL Configuration đặt Site URL là domain thực. Vercel [Hobby](https://vercel.com/docs/plans/hobby) chỉ dành cho cá nhân, phi thương mại;
+cần gói phù hợp cho việc dùng nội bộ doanh nghiệp hoặc lựa chọn hosting khác.
 
 Các trang `*-review.html` là kết quả kiểm tra local, được gitignore; không đưa chúng lên deploy
 vì chúng không qua Auth. Bản production không cấu hình live sẽ hiện hướng dẫn thiết lập.

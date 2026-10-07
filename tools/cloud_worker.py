@@ -77,7 +77,10 @@ def work(db,job,settings):
   result=run(['tools/check_apple_urls.py'],input_text=json.dumps(payload));data=json.loads(result.stdout.strip().splitlines()[-1])
   if not data.get('ok'):raise PipelineError(data.get('error','Không kiểm tra được URL'))
   result=run(['tools/apple_url_status.py']);statuses=json.loads(result.stdout.strip().splitlines()[-1])
-  db.table('app_settings').upsert({'key':'apple_url_checks','value':statuses.get('statuses',{})}).execute()
+  previous=settings.get('apple_url_checks',{}).get('value',{})
+  model=payload['model'];rule=next(r for r in prefs['products'] if r['model']==model)
+  value={'rules':{**previous.get('rules',{}),model:rule},'statuses':{**previous.get('statuses',{}),model:statuses.get('statuses',{}).get(model,[])}}
+  db.table('app_settings').upsert({'key':'apple_url_checks','value':value}).execute()
   return {'url_results':data.get('results',[]),'channels':{},'message':'Đã kiểm tra link; chưa công bố giá'},'success'
  channels=[channel_slug(name) for name in resolve(payload.get('channels') or ['all'])];results={};lock=threading.Lock()
  def one(slug):
