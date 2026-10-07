@@ -55,7 +55,7 @@ export default function Dashboard({mode,initialRows,initialIssues,initialCatalog
   },[mode,email,start,refresh,period]);
   const products=useMemo(()=>period==='day'?groupDay(rows,day):groupWeek(rows,start),[rows,start,period,day]);
   const trackingEntries=useMemo(()=>[...rows,...initialCatalog,...issues].filter(r=>r.product_name?.trim()||r.model_name?.trim()).map(modelEntry),[rows,issues,initialCatalog]);
-  const watch=useWatchlist(mode,userId,trackingEntries);
+  const watch=useWatchlist(mode,mode==="demo"||Boolean(userId),trackingEntries);
   const metadata=useMemo(()=>[...products.map(p=>({...p.latest})),...initialCatalog,...issues],[products,initialCatalog,issues]);
   const categories=[...new Set([...CATEGORIES,...metadata.map(categoryOf)])];
   const brands=useMemo(()=>[...new Set(metadata.map(brandOf))].sort((a,b)=>compareModels(a,b)),[metadata]);
