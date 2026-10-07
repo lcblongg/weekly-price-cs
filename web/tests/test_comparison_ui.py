@@ -14,6 +14,19 @@ async def main():
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto(URL,wait_until='networkidle');await page.locator('tbody tr').first.wait_for()
   assert await page.locator('thead th').all_text_contents()==['BASE MODEL','MW','CPS','FPT','VIETTEL','PV']
+  assert await page.get_by_role('button',name='Giá gần nhất',exact=True).get_attribute('aria-pressed')=='true'
+  latest=page.get_by_role('row').filter(has_text='iPhone 17 Pro Max 256GB')
+  assert await latest.locator('td button').count()==5
+  assert all('₫' in value for value in await latest.locator('td button').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("aria-label"))'))
+  assert '6/10/26' in await latest.inner_text() and '7/10/26' in await latest.inner_text()
+  await page.screenshot(path=str(OUT/'latest-prices.png'))
+  await page.get_by_label('Chọn model',exact=True).select_option('iPhone 17 Pro Max')
+  async with page.expect_download() as latest_download:await page.get_by_role('button',name='Xuất Excel',exact=True).click()
+  latest_file=await latest_download.value;await latest_file.save_as(OUT/'latest-filtered.xlsx')
+  latest_records=list(load_workbook(OUT/'latest-filtered.xlsx')['Chi tiết SKU'].values)[1:]
+  assert {r[0] for r in latest_records}=={'MW','CPS','FPT','VIETTEL','PV'}
+  assert all('iPhone 17 Pro Max' in r[1] for r in latest_records)
+
   await page.get_by_label('Chọn ngày',exact=True).select_option('2026-10-07')
   await page.get_by_label('Chọn model',exact=True).select_option('iPhone 17 Pro Max')
   quote=page.get_by_role('button',name='iPhone 17 Pro Max 256GB, CPS: 34.990.000 ₫',exact=True)
