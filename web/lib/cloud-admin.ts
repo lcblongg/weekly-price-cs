@@ -1,5 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
 export function cloudEnabled(){return process.env.NEXT_PUBLIC_DATA_MODE==='live';}
+// Khách xem bảng giá không cần đăng nhập; mọi API ghi/quản trị vẫn qua authorize(admin).
+export function publicView(){return process.env.NEXT_PUBLIC_PUBLIC_VIEW==='true';}
 export function serviceDb(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error('Chưa cấu hình dịch vụ Supabase phía server.');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
 export async function authorize(request:Request,admin=false){
  const jwt=request.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1];if(!jwt)throw new Error('401: Vui lòng đăng nhập.');

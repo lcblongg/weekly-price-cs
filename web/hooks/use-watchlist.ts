@@ -4,6 +4,8 @@ import {supabase} from '@/lib/supabase';
 import {discoverModels,emptyWatchlist,parseWatchlist,type ModelEntry,type Watchlist} from '@/lib/watchlist';
 const KEY='weekly-price-cs:watchlist:v1';
 export function useWatchlist(mode:string,userId:string|null,entries:ModelEntry[]) {
+ // Khách xem công khai (live, chưa đăng nhập) lưu lựa chọn trên trình duyệt như demo.
+ if(mode==='live'&&!userId)mode='demo';
  const [state,setState]=useState<Watchlist>(emptyWatchlist),[ready,setReady]=useState(false),[status,setStatus]=useState(''),[error,setError]=useState(''),[retry,setRetry]=useState(0);
  const generation=useRef(0),queue=useRef<Promise<void>>(Promise.resolve()),latest=useRef(state);
  useEffect(()=>{

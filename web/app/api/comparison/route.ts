@@ -1,10 +1,10 @@
 import {addDays} from '@/lib/calendar';
 import {createHash} from 'node:crypto';
 import {comparisonPage} from '@/lib/comparison-page';
-import {authorize,cloudError} from '@/lib/cloud-admin';
+import {authorize,cloudError,publicView,serviceDb} from '@/lib/cloud-admin';
 export const dynamic='force-dynamic';
 export async function GET(request:Request){try{
- const {db}=await authorize(request);const params=new URL(request.url).searchParams;const start=params.get('start');const offset=Number(params.get('offset')??0);if(!Number.isSafeInteger(offset)||offset<0||offset>100000)return Response.json({error:'Offset không hợp lệ.'},{status:400});let query=db.from('dashboard_snapshots').select('id,chain_name,business_date,completed_at,payload').order('business_date',{ascending:false}).order('chain_name');
+ const {db}=publicView()?{db:serviceDb()}:await authorize(request);const params=new URL(request.url).searchParams;const start=params.get('start');const offset=Number(params.get('offset')??0);if(!Number.isSafeInteger(offset)||offset<0||offset>100000)return Response.json({error:'Offset không hợp lệ.'},{status:400});let query=db.from('dashboard_snapshots').select('id,chain_name,business_date,completed_at,payload').order('business_date',{ascending:false}).order('chain_name');
  if(start){if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||Number.isNaN(Date.parse(start)))return Response.json({error:'Ngày không hợp lệ.'},{status:400});const end=new Date(start+'T00:00:00Z');end.setUTCDate(end.getUTCDate()+6);query=query.gte('business_date',addDays(start,-7)).lte('business_date',end.toISOString().slice(0,10));}else query=query.limit(35);
  const {data,error}=await query;if(error)throw error;const settings=await db.from('app_settings').select('key,value,revision').in('key',['apple_colors','apple_models']).order('key');if(settings.error)throw settings.error;
  const generation=createHash('sha256').update(JSON.stringify([(data??[]).map(s=>[s.id,s.completed_at]),settings.data.map(s=>[s.key,s.revision])])).digest('hex');if(params.get('generation')&&params.get('generation')!==generation)return Response.json({error:'Snapshot đã thay đổi trong lúc tải.'},{status:409});

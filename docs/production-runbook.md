@@ -85,7 +85,13 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_KEY
 GITHUB_REPOSITORY=lcblongg/weekly-price-cs
 GITHUB_ACTIONS_TOKEN=YOUR_FINE_GRAINED_TOKEN
 GITHUB_WORKFLOW_REF=main
+# Tùy chọn: true = ai cũng xem bảng giá/lịch sử không cần đăng nhập (chỉ đọc).
+NEXT_PUBLIC_PUBLIC_VIEW=true
 ```
+
+`NEXT_PUBLIC_PUBLIC_VIEW=true`: `/api/comparison` trả snapshot đã công bố cho khách; khách lưu "Sản phẩm theo dõi"
+trên trình duyệt. Quản lý Apple, job cập nhật giá và mọi API ghi vẫn bắt buộc tài khoản admin (nút "Đăng nhập quản trị").
+Tắt: đặt `false` (hoặc xóa biến) rồi Redeploy — biến `NEXT_PUBLIC_*` chỉ có hiệu lực sau khi build lại.
 
 Token GitHub chỉ cấp repository này và quyền **Actions: write**, Metadata: read;
 không đưa token/service key vào biến `NEXT_PUBLIC_*`. Vercel chỉ xác thực/dispatch/đọc DB;
