@@ -1,10 +1,9 @@
-"""Nghiệm thu bảng so sánh thực tế: lọc, watchlist, Excel, chi tiết SKU và mobile.
+"""Nghiệm thu bảng so sánh thực tế: lọc, watchlist, thông báo, chi tiết SKU và mobile.
 Không khởi chạy bot, không gửi Telegram, không sửa quy chuẩn dùng chung.
 """
 import asyncio,json,os
 from pathlib import Path
 from playwright.async_api import async_playwright
-from openpyxl import load_workbook
 ROOT=Path(__file__).resolve().parents[2]
 URL=os.environ.get('DASHBOARD_URL','http://127.0.0.1:3000')
 OUT=ROOT/'artifacts/production-readiness/ui';OUT.mkdir(parents=True,exist_ok=True)
@@ -18,15 +17,10 @@ async def main():
   latest=page.get_by_role('row').filter(has_text='iPhone 17 Pro Max 256GB')
   assert await latest.locator('td button').count()==5
   assert all('₫' in value for value in await latest.locator('td button').evaluate_all('(nodes)=>nodes.map(n=>n.getAttribute("aria-label"))'))
-  assert '6/10/26' in await latest.inner_text() and '7/10/26' in await latest.inner_text()
+  assert '7/10/26' in await latest.inner_text()
   await page.screenshot(path=str(OUT/'latest-prices.png'))
   await page.get_by_label('Chọn model',exact=True).select_option('iPhone 17 Pro Max')
-  async with page.expect_download() as latest_download:await page.get_by_role('button',name='Xuất Excel',exact=True).click()
-  latest_file=await latest_download.value;await latest_file.save_as(OUT/'latest-filtered.xlsx')
-  latest_records=list(load_workbook(OUT/'latest-filtered.xlsx')['Chi tiết SKU'].values)[1:]
-  assert {r[0] for r in latest_records}=={'MW','CPS','FPT','VIETTEL','PV'}
-  assert all('iPhone 17 Pro Max' in r[1] for r in latest_records)
-
+  assert await page.get_by_role('button',name='Xuất Excel',exact=True).count()==0
   await page.get_by_label('Chọn ngày',exact=True).select_option('2026-10-07')
   await page.get_by_label('Chọn model',exact=True).select_option('iPhone 17 Pro Max')
   quote=page.get_by_role('button',name='iPhone 17 Pro Max 256GB, CPS: 34.990.000 ₫',exact=True)
@@ -57,13 +51,8 @@ async def main():
   assert await page.locator('tbody tr').count()>0
   await page.get_by_label('Chọn kênh',exact=True).select_option('CPS')
   assert await page.locator('thead th').all_text_contents()==['BASE MODEL','CPS']
-  async with page.expect_download() as download:await page.get_by_role('button',name='Xuất Excel',exact=True).click()
-  f=await download.value;await f.save_as(OUT/'filtered.xlsx');book=load_workbook(OUT/'filtered.xlsx')
-  records=list(book['Chi tiết SKU'].values)[1:];assert records
-  assert all(r[0]=='CPS' and 'iPhone 16 Plus' in r[1] for r in records)
-  assert all(r[4] is None or isinstance(r[4],(int,float)) and r[4]>0 for r in records)
   await page.get_by_role('button',name='Theo tuần',exact=True).click()
-  assert await page.locator('[aria-pressed]').count()>=9
+  assert await page.get_by_role('table',name='Biến động giá đủ 7 ngày').locator('thead th').count()==10
   await page.get_by_role('button',name='Sản phẩm theo dõi',exact=True).click()
   await page.get_by_role('button',name='Khôi phục mặc định',exact=True).click()
   await page.wait_for_function("JSON.parse(localStorage.getItem('weekly-price-cs:watchlist:v1')).hidden.length===0")
@@ -74,6 +63,6 @@ async def main():
   await page.screenshot(path=str(OUT/'mobile.png'),full_page=False)
   await page.set_viewport_size({'width':1440,'height':1000});await page.screenshot(path=str(OUT/'desktop.png'))
   assert not errors,errors
-  (OUT/'result.json').write_text(json.dumps({'ok':True,'export_skus':len(records),'checks':['5 channels','CPS real price/color/SKU','date-brand-category-model-chain','watchlist persistence/exact model','Excel filtering','week days','mobile'],'browser_errors':errors},ensure_ascii=False,indent=2))
-  await browser.close();print('PASS: matrix filters, verified CPS detail, watchlist persistence, Excel, week, mobile')
+  (OUT/'result.json').write_text(json.dumps({'ok':True,'checks':['5 channels','CPS real price/color/SKU','date-brand-category-model-chain','watchlist persistence/exact model','no Excel','week days','mobile'],'browser_errors':errors},ensure_ascii=False,indent=2))
+  await browser.close();print('PASS: matrix filters, verified CPS detail, watchlist persistence, no Excel, week, mobile')
 asyncio.run(main())
