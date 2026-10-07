@@ -131,4 +131,32 @@ end $$;
 revoke all on function public.seed_discovery_catalog(text,jsonb,timestamptz) from public,anon,authenticated;
 grant execute on function public.seed_discovery_catalog(text,jsonb,timestamptz) to service_role;
 
+-- Import snapshot đã nghiệm thu vào dự án mới, kèm lịch sử đúng thời điểm từng SKU.
+-- Không chạy trong lúc bot đang công bố và không thay ngày đã có dữ liệu.
+grant update(captured_at,business_date,week_start) on public.daily_prices to service_role;
+create function public.seed_dashboard_history(p_chain text,p_date date,p_payload jsonb,p_rows jsonb)
+returns uuid language plpgsql security invoker set search_path='' as $$
+declare result uuid; run uuid; captured timestamptz; begin
+ perform pg_advisory_xact_lock(hashtext('seed-history:'||p_chain||':'||p_date::text));
+ select id into result from public.dashboard_snapshots where chain_name=p_chain and business_date=p_date;
+ if result is not null then return result;end if;
+ if exists(select 1 from public.automation_jobs where status in ('pending','running')) then raise exception 'Không import khi bot đang chạy';end if;
+ if exists(select 1 from public.daily_prices where chain_name=p_chain and business_date=p_date) then raise exception 'Ngày đã có lịch sử; không import đè';end if;
+ if jsonb_typeof(p_payload->'rows') is distinct from 'array' then raise exception 'Snapshot không hợp lệ';end if;
+ if exists(select 1 from jsonb_to_recordset(p_rows) x(observed_at timestamptz)
+  where observed_at is null or observed_at>now()+interval '5 minutes' or (observed_at at time zone 'Asia/Ho_Chi_Minh')::date<>p_date)
+  then raise exception 'Thời điểm SKU không hợp lệ';end if;
+ select max(observed_at) into captured from jsonb_to_recordset(p_rows) x(observed_at timestamptz);
+ run := public.commit_chain_price_run(p_chain,extract(isoyear from p_date)::integer,extract(week from p_date)::integer,p_rows,'[]',jsonb_array_length(p_rows),null);
+ update public.scrape_runs set completed_at=captured where id=run;
+ update public.daily_prices d set captured_at=x.observed_at,
+  business_date=(x.observed_at at time zone 'Asia/Ho_Chi_Minh')::date,
+  week_start=date_trunc('week',x.observed_at at time zone 'Asia/Ho_Chi_Minh')::date
+ from jsonb_to_recordset(p_rows) x(sku text,observed_at timestamptz) where d.run_id=run and d.sku=x.sku;
+ insert into public.dashboard_snapshots(chain_name,business_date,payload) values(p_chain,p_date,p_payload) returning id into result;
+ return result;
+end $$;
+revoke all on function public.seed_dashboard_history(text,date,jsonb,jsonb) from public,anon,authenticated;
+grant execute on function public.seed_dashboard_history(text,date,jsonb,jsonb) to service_role;
+
 commit;

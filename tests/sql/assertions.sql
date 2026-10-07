@@ -48,4 +48,14 @@ do $$ begin
  if (select count(*) from public.dashboard_snapshots)<>0 or (select count(*) from public.daily_prices)<>0 then raise exception 'Tài khoản chưa cấp quyền đọc được giá';end if;
 end $$;
 reset role;
-select 'PASS: 8 migrations, atomic rollback, revision/lease fence, Auth roles, personal isolation' as result;
+set role service_role;
+select public.seed_dashboard_history('FPT Shop',current_date-1,'{"rows":[]}',
+ jsonb_build_array(jsonb_build_object('chain_name','FPT Shop','sku','fpt-old','product_name','Đã nghiệm thu','promo_price',2000000,'source_url','https://fptshop.com.vn/old','observed_at',(current_date-1)::text||'T10:00:00+07:00')));
+select public.seed_discovery_catalog('FPT Shop','[{"chain_name":"FPT Shop","source_url":"https://fptshop.com.vn/old","status":"ready","config":{}}]',((current_date-1)::text||'T09:00:00+07:00')::timestamptz);
+do $$ begin
+ if (select business_date from public.daily_prices where sku='fpt-old')<>current_date-1 then raise exception 'Import làm giả ngày cào';end if;
+ if (select captured_at from public.daily_prices where sku='fpt-old')<>((current_date-1)::text||'T10:00:00+07:00')::timestamptz then raise exception 'Import mất thời điểm SKU';end if;
+ if (select completed_at from public.discovery_runs where chain_name='FPT Shop')<>((current_date-1)::text||'T09:00:00+07:00')::timestamptz then raise exception 'Import làm mới timestamp catalog';end if;
+end $$;
+reset role;
+select 'PASS: 8 migrations, atomic rollback, revision/lease, RLS roles/watchlist, historical import timestamps' as result;

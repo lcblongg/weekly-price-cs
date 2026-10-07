@@ -171,7 +171,10 @@ def main(args):
     for day in sorted({r['observed_at'][:10] for r in rows}):
      payload={'rows':[r for r in rows if r['observed_at'][:10]==day],'issues':[i for i in data.get('issues',[]) if i.get('slug')==slug],'source':next((s for s in data.get('sources',[]) if s['slug']==slug),{})}
      exists=db.table('dashboard_snapshots').select('id').eq('chain_name',chain).eq('business_date',day).execute().data
-     if not exists:db.table('dashboard_snapshots').insert({'chain_name':chain,'business_date':day,'payload':payload}).execute()
+     if not exists:
+      payload['source']['updated']=max(r['observed_at'] for r in payload['rows'])
+      history=[{**r,'chain_name':chain,'model_name':r['apple_model'],'variant_label':r.get('display_variant') or '', 'original_price':None} for r in payload['rows']]
+      db.rpc('seed_dashboard_history',{'p_chain':chain,'p_date':day,'p_payload':payload,'p_rows':history}).execute()
   print('Khởi tạo cấu hình hoàn tất; không ghi đè cấu hình/snapshot đã có.');return
  if args.job_id:uuid.UUID(args.job_id);job_id=args.job_id
  else:
