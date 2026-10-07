@@ -38,4 +38,6 @@ Các số dưới đây là SKU duy nhất đang hiển thị, sau quy chuẩn m
 - Bootstrap giữ timestamp gốc, nhóm theo ngày Việt Nam và chọn bản cuối cùng của SKU trong ngày; không biến trạng thái cuối thành giá cũ. Hai kiểm tra hồi quy nhập lịch sử đạt.
 - Có `tools/env_runner.py` để nạp .env khi chạy script Python mà không thực thi shell hoặc in khóa. Hai kiểm tra parser đạt.
 - Đã kiểm tra lại hai luồng browser sau khi MW công bố xong: bảng 5 kênh, PRICE FLASH, đỏ/xanh, ngày/tuần, watchlist và mobile đều đạt.
-- Tài khoản Supabase đang chờ người dùng đăng nhập trong trình duyệt; chưa tạo DB hay triển khai cloud.
+- Đã đăng nhập Supabase và tạo tổ chức Weekly Price CS trên gói Free. Đã chuẩn bị biểu mẫu dự án weekly-price-cs, vùng Asia-Pacific, Data API bật nhưng không tự cấp quyền expose bảng mới. Chờ người dùng tự tạo mật khẩu và gửi biểu mẫu; chưa chạy migration/import/deploy.
+
+- Nghiệm thu bổ sung: 165 test Python đạt. Bản xem trước Telegram loại SKU đang giữ giá cũ và không gắn nhãn “Đủ” cho kênh có mục lỗi; không gửi tin thật.

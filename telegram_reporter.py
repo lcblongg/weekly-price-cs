@@ -126,7 +126,7 @@ def render(current, previous, period, web_url, catalog=None, fiscal=None, summar
         for chain, (total, ok) in sorted(summary.get('by_chain', {}).items()):
             lines.append(f'• {esc(chain)}: {ok}/{total} link có giá/trạng thái')
         if summary.get('degraded_chains'):
-            lines.append('❗ Đại lý chưa đọc được &gt;50% link: ' + esc(', '.join(summary['degraded_chains'])) + ' — cần người vận hành kiểm tra adapter.')
+            lines.append('❗ Đại lý còn lỗi hoặc cần kiểm tra: ' + esc(', '.join(summary['degraded_chains'])) + ' — xem số link và nguyên nhân phía trên.')
         blocks.append('\n'.join(lines))
     if not previous:
         blocks.append('ℹ️ Chưa có dữ liệu tuần liền trước; đây là tuần tạo đường cơ sở.')
@@ -221,6 +221,9 @@ def status_block(states):
     lines = ['<b>🧭 Tình trạng 5 kênh</b>']
     for name, item in states.items():
         label = STATUS.get(item.get('status'), item.get('status'))
+        if item.get('status') in ('ok','degraded') and (item.get('issues',0) or
+                (item.get('prices') is not None and item.get('expected') is not None and item['prices']<item['expected'])):
+            label = '⚠️ Còn mục cần kiểm tra'
         if item.get('prices') is not None and item.get('expected') is not None:
             detail = f"{item['prices']}/{item['expected']} link có giá/trạng thái"
             if item.get('blocked'):
@@ -274,7 +277,8 @@ def daily_report(args):
             # Không đọc watchlist cá nhân; local preview cũng áp dụng cùng phạm vi.
             if 'report_skus' in item:
                 allowed=set(item['report_skus']);loaded=[r for r in loaded if r['sku'] in allowed]
-            current += loaded
+            # File local có thể giữ SKU lỗi từ ngày cũ; không gọi chúng là kết quả mới.
+            current += [r for r in loaded if not r.get('stale_since')]
         except PipelineError as exc:
             item.update(status='failed', message=f'Không đọc lại được dữ liệu đã lưu: {exc}')
     current, previous = filter_report_rows(current, previous, getattr(args, "watchlist", None))

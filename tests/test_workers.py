@@ -203,6 +203,20 @@ class PriceWorkerTests(unittest.TestCase):
 
 
 class AggregatorTests(unittest.TestCase):
+    def test_retained_local_price_is_not_reported_as_fresh(self):
+        with tempfile.TemporaryDirectory() as out:
+            folder=Path(out)/'prices/tgdd';folder.mkdir(parents=True)
+            summary={'chain_name':'TGDD','stage':'prices','status':'ok','expected':2,'prices':1,'issues':1}
+            fresh={'chain_name':'TGDD','sku':'a','product_name':'A','promo_price':100000,'promo_text':''}
+            stale={**fresh,'sku':'b','stale_since':'2026-10-07'}
+            (folder/'summary.json').write_text(json.dumps(summary))
+            (folder/'prices.json').write_text(json.dumps([fresh,stale]))
+            args=Namespace(summaries=str(Path(out)/'prices'),out=str(Path(out)/'report'),local=True,dry_run=True,chains='tgdd')
+            telegram_reporter.daily_report(args)
+            report=(Path(out)/'report/report.html').read_text()
+            self.assertIn('1 bản ghi giá/trạng thái',report)
+            self.assertNotIn('2 bản ghi giá/trạng thái',report)
+            self.assertIn('TGDD: ⚠️ Còn mục cần kiểm tra',report)
     def test_combined_report_states_every_channel(self):
         with tempfile.TemporaryDirectory() as out:
             base = Path(out) / 'prices'
@@ -219,7 +233,7 @@ class AggregatorTests(unittest.TestCase):
             self.assertEqual(states['TGDD']['status'], 'failed')
             self.assertEqual(states['CellphoneS']['status'], 'missing')
             html = (Path(out) / 'report' / 'report.html').read_text()
-            for text in ('Tình trạng 5 kênh', 'TGDD: ❌ Lỗi', 'Phong Vũ: ✅ Đủ — 1/2 link có giá', 'CellphoneS: ❌ Không có kết quả'):
+            for text in ('Tình trạng 5 kênh', 'TGDD: ❌ Lỗi', 'Phong Vũ: ⚠️ Còn mục cần kiểm tra — 1/2 link có giá', 'CellphoneS: ❌ Không có kết quả'):
                 self.assertIn(text, html)
 
     def test_manual_rerun_marks_unselected_as_skipped(self):
