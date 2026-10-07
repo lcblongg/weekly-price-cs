@@ -49,5 +49,13 @@ for m in MODELS:
  model_meta.setdefault(m,{'brand':'Apple','category':'Điện thoại' if m.startswith('iPhone') else 'Máy tính bảng' if m.startswith('iPad') else 'Đồng hồ thông minh' if m.startswith('Apple Watch') else 'AirPods' if m.startswith('AirPods') else 'Máy tính xách tay'})
 models=list(MODELS)+sorted(set(model_meta)-set(MODELS),key=str.casefold)
 payload={'model_meta':model_meta,'rows':rows,'issues':issues,'sources':sources,'models':models,'preferences':prefs}
-target=ROOT/'web/data/comparison.json';temp=target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp');temp.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')));temp.replace(target)
+target=ROOT/'web/data/comparison.json'
+if target.exists():
+ from daily_publication import merge_history
+ previous=json.loads(target.read_text())
+ # Giữ ngày lịch sử; quy tắc màu đổi thì dữ liệu màu cũ không lọt vào cấu hình mới.
+ history=[r for r in previous['rows'] if r.get('apple_selection')!='selected' or previous.get('preferences')==prefs]
+ payload['rows']=merge_history(history,rows)
+
+temp=target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp');temp.write_text(json.dumps(payload,ensure_ascii=False,separators=(',',':')));temp.replace(target)
 print(len(rows),'bản ghi so sánh')

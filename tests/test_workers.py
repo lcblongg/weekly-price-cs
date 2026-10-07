@@ -100,6 +100,14 @@ def catalog_row(chain, code, i, status='ready'):
 
 
 class PriceWorkerTests(unittest.TestCase):
+    def setUp(self):
+        # Unit test dùng khóa riêng, không tranh khóa hoặc ảnh hưởng bot thật đang chạy.
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        locks = patch.object(apple_jobs, 'LOCKS', Path(folder.name))
+        locks.start()
+        self.addCleanup(locks.stop)
+
     def run_workers(self, out, adapters, limit=None):
         rows = [catalog_row('Phong Vũ', 'pv', i) for i in range(4)] + [catalog_row('Phong Vũ', 'pv', 9, 'review')]
         rows += [catalog_row('FPT Shop', 'fpt', i) for i in range(3)]
