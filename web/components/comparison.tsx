@@ -20,7 +20,8 @@ export default function Comparison({data,mode='demo',userId=null,isAdmin=true,in
  const dialog=useRef<HTMLDialogElement>(null);
  const entries=useMemo(()=>data.models.map(name=>modelEntry({product_name:name,model_name:name,...data.model_meta[name]})),[data.models,data.model_meta]);
  const canEdit=mode==='demo'||isAdmin,watch=useWatchlist(mode,canEdit,entries),ready=watch.ready;
- const hidden=watch.state.models.filter(m=>watch.state.hidden.includes(m.id)).map(m=>m.name);
+ // Khách không chạy discoverModels: lấy cả model đang có trong dữ liệu để áp đúng danh sách ẩn dùng chung.
+ const hidden=[...new Set([...watch.state.models,...entries].filter(m=>watch.state.hidden.includes(m.id)).map(m=>m.name))];
  const setHidden=(names:string[])=>{const ids=entries.filter(m=>names.includes(m.name)).map(m=>m.id);const other=watch.state.hidden.filter(id=>!entries.some(m=>m.id===id));watch.change({...watch.state,hidden:[...other,...ids]});};
  useEffect(()=>{if(selected)dialog.current?.showModal();else dialog.current?.close();},[selected]);
  const weekDays=datesForWeek(weekStart(day));
