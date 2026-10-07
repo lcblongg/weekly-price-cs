@@ -1,0 +1,74 @@
+[
+  {
+    "chain_name": "TGDD",
+    "seeds": [
+      "https://www.thegioididong.com/dtdd-apple-iphone"
+    ],
+    "product_url_pattern": "^https://(?:www\\.)?thegioididong\\.com/dtdd/iphone-[^/?]+(?:\\?.*)?$",
+    "link_selector": "a[href]",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 200,
+    "scroll_rounds": 6,
+    "identity_family": "iphone",
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "FPT Shop",
+    "seeds": [
+      "https://fptshop.com.vn/dien-thoai/apple-iphone"
+    ],
+    "product_url_pattern": "^https://(?:www\\.)?fptshop\\.com\\.vn/dien-thoai/iphone-[^/?]+(?:\\?.*)?$",
+    "link_selector": "a[href]",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 200,
+    "scroll_rounds": 6,
+    "identity_family": "iphone",
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "CellphoneS",
+    "seeds": [
+      "https://cellphones.com.vn/mobile/apple.html"
+    ],
+    "product_url_pattern": "^https://(?:www\\.)?cellphones\\.com\\.vn/iphone-[^/?]+\\.html(?:\\?.*)?$",
+    "link_selector": "a[href]",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 200,
+    "scroll_rounds": 6,
+    "identity_family": "iphone",
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  }
+]

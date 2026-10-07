@@ -1,0 +1,97 @@
+[
+  {
+    "chain_name": "TGDD",
+    "sku": "apple-iphone-16-128gb-vn-new",
+    "product_name": "Apple iPhone 16 128GB VN/A — mới",
+    "url": "https://www.thegioididong.com/dtdd/iphone-16",
+    "verified": false,
+    "verify_tokens": [
+      "iPhone 16",
+      "128GB"
+    ],
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "FPT Shop",
+    "sku": "apple-iphone-16-128gb-vn-new",
+    "product_name": "Apple iPhone 16 128GB VN/A — mới",
+    "url": "https://fptshop.com.vn/dien-thoai/iphone-16",
+    "verified": false,
+    "verify_tokens": [
+      "iPhone 16",
+      "128GB"
+    ],
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "CellphoneS",
+    "sku": "apple-iphone-16-128gb-vn-new",
+    "product_name": "Apple iPhone 16 128GB VN/A — mới",
+    "url": "https://cellphones.com.vn/iphone-16.html",
+    "verified": false,
+    "verify_tokens": [
+      "iPhone 16",
+      "128GB"
+    ],
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "Viettel Store",
+    "sku": "apple-iphone-16-128gb-vn-new",
+    "product_name": "Apple iPhone 16 128GB VN/A — mới",
+    "url": "https://viettelstore.vn/",
+    "verified": false,
+    "verify_tokens": [
+      "iPhone 16",
+      "128GB"
+    ],
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  },
+  {
+    "chain_name": "Phong Vũ",
+    "sku": "apple-iphone-16-128gb-vn-new",
+    "product_name": "Apple iPhone 16 128GB VN/A — mới",
+    "url": "https://phongvu.vn/",
+    "verified": false,
+    "verify_tokens": [
+      "iPhone 16",
+      "128GB"
+    ],
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    }
+  }
+]

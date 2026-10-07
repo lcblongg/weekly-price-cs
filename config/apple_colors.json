@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "products": [
+    {
+      "model": "iPhone 18 Pro Max",
+      "color": "Đỏ Burgundy",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 18 Pro",
+      "color": "Đỏ Burgundy",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 17 Pro Max",
+      "color": "Cam vũ trụ",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 17 Pro",
+      "color": "Cam vũ trụ",
+      "aliases": []
+    },
+    {
+      "model": "iPhone Air",
+      "color": "Trắng Mây",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 17",
+      "color": "Xanh Lá Xô Thôm",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 17e",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 16 Plus",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 16",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 15 Plus",
+      "color": "Hồng",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 15",
+      "color": "Hồng",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 14",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "iPhone 13",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "iPad A16",
+      "color": "Bạc",
+      "aliases": []
+    },
+    {
+      "model": "iPad Air M4 11",
+      "color": "Xám Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "iPad Air M4 13",
+      "color": "Xám Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "iPad Pro M5 11",
+      "color": "Đen Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "iPad Pro M5 13",
+      "color": "Đen Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "iPad Mini 7",
+      "color": "Xám",
+      "aliases": []
+    },
+    {
+      "model": "iMac",
+      "color": "Bạc",
+      "aliases": []
+    },
+    {
+      "model": "Mac Mini",
+      "color": null,
+      "aliases": []
+    },
+    {
+      "model": "MacBook Neo",
+      "color": "Vàng Citrus",
+      "aliases": []
+    },
+    {
+      "model": "MacBook Air 13 M5",
+      "color": "Xanh Da Trời",
+      "aliases": []
+    },
+    {
+      "model": "MacBook Air 15 M5",
+      "color": "Xanh Da Trời",
+      "aliases": []
+    },
+    {
+      "model": "MacBook Pro 14 M5",
+      "color": "Đen Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "MacBook Pro 16 M5 Pro",
+      "color": "Đen Không Gian",
+      "aliases": []
+    },
+    {
+      "model": "Apple Watch S11",
+      "color": "Đen Bóng",
+      "aliases": []
+    },
+    {
+      "model": "Apple Watch SE 3",
+      "color": "Ánh Sao",
+      "aliases": []
+    },
+    {
+      "model": "Apple Watch Ultra 3",
+      "color": "Đen",
+      "aliases": []
+    },
+    {
+      "model": "AirPods 4",
+      "color": null,
+      "aliases": []
+    },
+    {
+      "model": "AirPods 4 with ANC",
+      "color": null,
+      "aliases": []
+    },
+    {
+      "model": "AirPods Pro 3",
+      "color": null,
+      "aliases": []
+    },
+    {
+      "model": "AirPods Max",
+      "color": "Đêm Xanh Thẳm",
+      "aliases": []
+    },
+    {
+      "model": "AirPods Max 2",
+      "color": "Đêm Xanh Thẳm",
+      "aliases": []
+    },
+    {
+      "model": "AirPods 5",
+      "color": null,
+      "aliases": []
+    },
+    {
+      "model": "AirPods 5 sạc ko dây",
+      "color": null,
+      "aliases": []
+    }
+  ]
+}

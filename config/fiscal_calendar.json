@@ -1,0 +1,18 @@
+{
+  "timezone": "Asia/Ho_Chi_Minh",
+  "week_starts_on": "Monday",
+  "confirmed_weeks": [
+    {
+      "week_start": "2026-10-05",
+      "week_end": "2026-10-11",
+      "label": "W2Q1FY27",
+      "fiscal_year": 27,
+      "quarter": 1,
+      "week": 2
+    }
+  ],
+  "quarter_rule": "13_weeks",
+  "anchor_week_start": "2026-09-28",
+  "anchor_fiscal_year": 27,
+  "weeks_per_year": 52
+}

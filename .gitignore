@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+artifacts/
+.DS_Store
+.artifact-work/
+outputs/
+
+node_modules/
+.next/
+*.tsbuildinfo
+
+web/.next-dev/
+# Kết quả kiểm tra riêng trên máy; cloud đọc dữ liệu được bảo vệ trên Supabase.
+web/public/*-review.html
+out/
+.next*/

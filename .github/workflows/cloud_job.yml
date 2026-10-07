@@ -1,0 +1,31 @@
+name: Cloud admin job
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: 'UUID job đã xác thực trong Supabase'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: weekly-price-production
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ${{ fromJSON(vars.RUNNER_LABELS || '["ubuntu-latest"]') }}
+    timeout-minutes: 350
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      JOB_ID: ${{ inputs.job_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12', cache: pip}
+      - run: python -m pip install --require-hashes -r requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - run: python tools/cloud_worker.py --job-id "$JOB_ID"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'cloud-job-${{ inputs.job_id }}', path: out/, retention-days: 14, if-no-files-found: ignore}

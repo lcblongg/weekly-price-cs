@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "name": "iPhone 18 Pro Max",
+      "pattern": "\\biPhone\\s+18\\s+Pro\\s+Max(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 18 Pro",
+      "pattern": "\\biPhone\\s+18\\s+Pro(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 17 Pro Max",
+      "pattern": "\\biPhone\\s+17\\s+Pro\\s+Max(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 17 Pro",
+      "pattern": "\\biPhone\\s+17\\s+Pro(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone Air",
+      "pattern": "\\biPhone\\s+Air(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 17",
+      "pattern": "\\biPhone\\s+17(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 17e",
+      "pattern": "\\biPhone\\s+17e(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 16 Plus",
+      "pattern": "\\biPhone\\s+16\\s+Plus(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 16",
+      "pattern": "\\biPhone\\s+16(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 15 Plus",
+      "pattern": "\\biPhone\\s+15\\s+Plus(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 15",
+      "pattern": "\\biPhone\\s+15(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 14",
+      "pattern": "\\biPhone\\s+14(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPhone 13",
+      "pattern": "\\biPhone\\s+13(?!\\s+(?:pro|max|plus|mini)\\b)\\b"
+    },
+    {
+      "name": "iPad A16",
+      "pattern": "\\bipad\\b(?!\\s+(?:air|pro|mini)\\b)(?=[\\s\\S]*\\ba16\\b)"
+    },
+    {
+      "name": "iPad Air M4 11",
+      "pattern": "\\bipad\\s+Air\\b(?=[\\s\\S]*\\bM4\\b)(?=[\\s\\S]*\\b11(?:\\s*inch)?\\b)"
+    },
+    {
+      "name": "iPad Air M4 13",
+      "pattern": "\\bipad\\s+Air\\b(?=[\\s\\S]*\\bM4\\b)(?=[\\s\\S]*\\b13(?:\\s*inch)?\\b)"
+    },
+    {
+      "name": "iPad Pro M5 11",
+      "pattern": "\\bipad\\s+Pro\\b(?=[\\s\\S]*\\bM5\\b)(?=[\\s\\S]*\\b11(?:\\s*inch)?\\b)"
+    },
+    {
+      "name": "iPad Pro M5 13",
+      "pattern": "\\bipad\\s+Pro\\b(?=[\\s\\S]*\\bM5\\b)(?=[\\s\\S]*\\b13(?:\\s*inch)?\\b)"
+    },
+    {
+      "name": "iPad Mini 7",
+      "pattern": "\\biPad\\s+Mini\\s+7\\b"
+    },
+    {
+      "name": "iMac",
+      "pattern": "\\biMac\\b"
+    },
+    {
+      "name": "Mac Mini",
+      "pattern": "\\bmac\\s*mini\\b"
+    },
+    {
+      "name": "MacBook Neo",
+      "pattern": "\\bMacBook\\s+Neo\\b"
+    },
+    {
+      "name": "MacBook Air 13 M5",
+      "pattern": "\\bmacbook\\s+Air\\b(?=[\\s\\S]*\\b13(?:\\s*inch)?\\b)(?=[\\s\\S]*\\bM5(?!\\s+(?:pro|max)\\b)\\b)"
+    },
+    {
+      "name": "MacBook Air 15 M5",
+      "pattern": "\\bmacbook\\s+Air\\b(?=[\\s\\S]*\\b15(?:\\s*inch)?\\b)(?=[\\s\\S]*\\bM5(?!\\s+(?:pro|max)\\b)\\b)"
+    },
+    {
+      "name": "MacBook Pro 14 M5",
+      "pattern": "\\bmacbook\\s+Pro\\b(?=[\\s\\S]*\\b14(?:\\s*inch)?\\b)(?=[\\s\\S]*\\bM5(?!\\s+(?:pro|max)\\b)\\b)"
+    },
+    {
+      "name": "MacBook Pro 16 M5 Pro",
+      "pattern": "\\bmacbook\\s+Pro\\b(?=[\\s\\S]*\\b16(?:\\s*inch)?\\b)(?=[\\s\\S]*\\bM5\\s+Pro\\b)"
+    },
+    {
+      "name": "Apple Watch S11",
+      "pattern": "\\bapple\\s+watch\\s+(?:series\\s*11|s11)\\b"
+    },
+    {
+      "name": "Apple Watch SE 3",
+      "pattern": "\\bApple\\s+Watch\\s+SE\\s+3\\b"
+    },
+    {
+      "name": "Apple Watch Ultra 3",
+      "pattern": "\\bApple\\s+Watch\\s+Ultra\\s+3\\b"
+    },
+    {
+      "name": "AirPods 4",
+      "pattern": "\\bairpods\\s+4\\b(?![\\s\\S]*(?:\\banc\\b|chống\\s+ồn))"
+    },
+    {
+      "name": "AirPods 4 with ANC",
+      "pattern": "\\bairpods\\s+4\\b(?=[\\s\\S]*(?:\\banc\\b|chống\\s+ồn))"
+    },
+    {
+      "name": "AirPods Pro 3",
+      "pattern": "\\bAirPods\\s+Pro\\s+3\\b"
+    },
+    {
+      "name": "AirPods Max",
+      "pattern": "\\bairpods\\s+max\\b(?!\\s+\\d)"
+    },
+    {
+      "name": "AirPods Max 2",
+      "pattern": "\\bAirPods\\s+Max\\s+2\\b"
+    },
+    {
+      "name": "AirPods 5",
+      "pattern": "\\bairpods\\s+5\\b(?![\\s\\S]*(?:sạc\\s+(?:không|ko)\\s+dây|wireless\\s+charging))"
+    },
+    {
+      "name": "AirPods 5 sạc ko dây",
+      "pattern": "\\bairpods\\s+5\\b(?=[\\s\\S]*(?:sạc\\s+(?:không|ko)\\s+dây|wireless\\s+charging))"
+    }
+  ]
+}

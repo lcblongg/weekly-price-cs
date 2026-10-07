@@ -1,0 +1,120 @@
+{
+  "TGDD": {
+    "link_selector": "a[title][href]",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 500,
+    "scroll_rounds": 6,
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    },
+    "category_url_patterns": {
+      "Điện thoại": "^https://(?:www\\.)?thegioididong\\.com/dtdd/[^/?#]+/?(?:\\?.*)?$",
+      "Máy tính bảng": "^https://(?:www\\.)?thegioididong\\.com/may-tinh-bang/[^/?#]+/?(?:\\?.*)?$",
+      "Máy tính xách tay": "^https://(?:www\\.)?thegioididong\\.com/laptop/[^/?#]+/?(?:\\?.*)?$",
+      "Đồng hồ thông minh": "^https://(?:www\\.)?thegioididong\\.com/dong-ho-thong-minh/[^/?#]+/?(?:\\?.*)?$",
+      "Airpods": "^https://(?:www\\.)?thegioididong\\.com/tai-nghe/[^/?#]+/?(?:\\?.*)?$"
+    }
+  },
+  "FPT Shop": {
+    "link_selector": ".cardInfo a[href]:has(h3)",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 500,
+    "scroll_rounds": 6,
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    },
+    "category_url_patterns": {
+      "Điện thoại": "^https://(?:www\\.)?fptshop\\.com\\.vn/dien-thoai/[^/?#]+/?(?:\\?.*)?$",
+      "Máy tính bảng": "^https://(?:www\\.)?fptshop\\.com\\.vn/may-tinh-bang/[^/?#]+/?(?:\\?.*)?$",
+      "Máy tính xách tay": "^https://(?:www\\.)?fptshop\\.com\\.vn/may-tinh-xach-tay/[^/?#]+/?(?:\\?.*)?$",
+      "Đồng hồ thông minh": "^https://(?:www\\.)?fptshop\\.com\\.vn/smartwatch/[^/?#]+/?(?:\\?.*)?$",
+      "Airpods": "^https://(?:www\\.)?fptshop\\.com\\.vn/tai-nghe/[^/?#]+/?(?:\\?.*)?$"
+    }
+  },
+  "CellphoneS": {
+    "link_selector": ".product-list-filter .product-info a.product__link[href]:has(h3)",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 500,
+    "scroll_rounds": 6,
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    },
+    "category_url_patterns": {
+      "Điện thoại": "^https://(?:www\\.)?cellphones\\.com\\.vn/[^/?#]+\\.html(?:\\?.*)?$",
+      "Máy tính bảng": "^https://(?:www\\.)?cellphones\\.com\\.vn/[^/?#]+\\.html(?:\\?.*)?$",
+      "Máy tính xách tay": "^https://(?:www\\.)?cellphones\\.com\\.vn/[^/?#]+\\.html(?:\\?.*)?$",
+      "Đồng hồ thông minh": "^https://(?:www\\.)?cellphones\\.com\\.vn/[^/?#]+\\.html(?:\\?.*)?$",
+      "Airpods": "^https://(?:www\\.)?cellphones\\.com\\.vn/[^/?#]+\\.html(?:\\?.*)?$"
+    }
+  },
+  "Viettel Store": {
+    "link_selector": "a[href]",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 500,
+    "scroll_rounds": 6,
+    "identity_scope": "vt-rule",
+    "variant_scope_verified": true,
+    "adapter_verified": true,
+    "category_url_patterns": {
+      "Điện thoại": "^https://(?:www\\.)?viettelstore\\.vn/[^?#]*-pid[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Máy tính bảng": "^https://(?:www\\.)?viettelstore\\.vn/[^?#]*-pid[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Đồng hồ thông minh": "^https://(?:www\\.)?viettelstore\\.vn/[^?#]*-pid[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Airpods": "^https://(?:www\\.)?viettelstore\\.vn/[^?#]*-pid[0-9]+(?:\\.html)?/?(?:\\?.*)?$"
+    },
+    "discovery_transport": "viettel_http",
+    "price_transport": "viettel_http"
+  },
+  "Phong Vũ": {
+    "link_selector": ".product-card a[href]:has(h3)",
+    "next_selector": null,
+    "max_pages": 10,
+    "max_candidates": 500,
+    "scroll_rounds": 6,
+    "identity_scope": "vn-new",
+    "variant_scope_verified": false,
+    "adapter_verified": false,
+    "selectors": {
+      "name": "h1",
+      "promo_price": "REPLACE_WITH_VERIFIED_PRICE_SELECTOR",
+      "original_price": null,
+      "promotions": [
+        "REPLACE_WITH_VERIFIED_PROMOTION_CONTAINER"
+      ]
+    },
+    "category_url_patterns": {
+      "Điện thoại": "^https://(?:www\\.)?phongvu\\.vn/[^?#]*--s[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Máy tính bảng": "^https://(?:www\\.)?phongvu\\.vn/[^?#]*--s[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Máy tính xách tay": "^https://(?:www\\.)?phongvu\\.vn/[^?#]*--s[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Đồng hồ thông minh": "^https://(?:www\\.)?phongvu\\.vn/[^?#]*--s[0-9]+(?:\\.html)?/?(?:\\?.*)?$",
+      "Airpods": "^https://(?:www\\.)?phongvu\\.vn/[^?#]*--s[0-9]+(?:\\.html)?/?(?:\\?.*)?$"
+    }
+  }
+}
