@@ -3,7 +3,7 @@
 ## Trạng thái thực tế
 
 Bản local đã có dashboard 5 kênh, quản lý model/màu Apple, lọc hãng/category/model/ngày/tuần,
-watchlist và xuất Excel. Mã cloud đã nối Supabase Auth, phân quyền admin/CS, job GitHub,
+watchlist, PRICE FLASH và so sánh tăng/giảm theo ngày/tuần. Mã cloud đã nối Supabase Auth, phân quyền admin/CS, job GitHub,
 snapshot ngày và công bố giá/lỗi/snapshot trong cùng transaction. Chưa xác nhận vận hành
 trên Supabase/Vercel thật nếu chưa có cấu hình tài khoản. Test PostgreSQL local không thay cho nghiệm thu dịch vụ thật.
 
@@ -89,7 +89,7 @@ Token GitHub chỉ cấp repository này và quyền **Actions: write**, Metadat
 không đưa token/service key vào biến `NEXT_PUBLIC_*`. Vercel chỉ xác thực/dispatch/đọc DB;
 Python và Chromium chạy trên GitHub runner, không chạy trong Vercel Function. API bảng giá phân trang
 dưới 3,5 MB/phản hồi để đáp ứng [giới hạn payload Vercel](https://vercel.com/docs/functions/limitations);
-client tải đủ các trang, kiểm tra generation nhất quán trước khi hiển thị/xuất Excel.
+client tải đủ các trang và kiểm tra generation nhất quán trước khi hiển thị.
 Dùng tên miền Vercel thực cấp, không cam kết `weekly-price-cs.vercel.app` còn khả dụng.
 Trong Supabase Auth → URL Configuration đặt Site URL là domain thực. Vercel [Hobby](https://vercel.com/docs/plans/hobby) chỉ dành cho cá nhân, phi thương mại;
 cần gói phù hợp cho việc dùng nội bộ doanh nghiệp hoặc lựa chọn hosting khác.
@@ -104,8 +104,8 @@ vì chúng không qua Auth. Bản production không cấu hình live sẽ hiện
    SKU, giá, giờ mới và bảo đảm model/kênh khác không đổi. Giá có thể thay đổi so với lượt local.
 3. Sửa quy chuẩn, đợi job success rồi tải lại quản lý. Không áp dụng một bản nháp cũ khi revision đã đổi.
 4. Thử check URL; trạng thái lưu trên DB. Chỉ job giá mới công bố giá.
-5. Xem 7 ngày: ngày chưa thu thập phải trống; SKU cũ giữ giờ gốc và cảnh báo nếu đọc lại lỗi.
-6. Watchlist ẩn đúng model, lưu theo tài khoản, không đổi báo cáo nhóm. Excel đúng bộ lọc.
+5. Theo ngày so đúng ngày liền trước; theo tuần so giá ghi nhận cuối tuần này với cuối tuần trước, có ghi ngày và mở chi tiết 7 ngày. Thiếu kỳ trước không tạo chênh lệch. Giảm nền/chữ đỏ, tăng nền/chữ xanh; PRICE FLASH cùng kỳ đối chiếu. SKU cũ giữ giờ gốc và cảnh báo nếu đọc lại lỗi.
+6. Watchlist ẩn đúng model, lưu theo tài khoản, không đổi báo cáo nhóm; bộ lọc áp dụng cả bảng và PRICE FLASH. Không có nút xuất Excel theo yêu cầu hiện tại.
 7. Chạy discovery/daily thủ công `send_report=false`; xem artifact và đủ 5 trạng thái kênh.
 8. Cấu hình bot vào nhóm Telegram, kiểm tra bằng lượt thủ công `send_report=true` chỉ khi đã có
    chỉ định gửi. Sau khi đạt, bật `PRODUCTION_ENABLED=true`.
