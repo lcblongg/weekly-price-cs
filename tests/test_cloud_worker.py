@@ -8,6 +8,20 @@ from unittest.mock import MagicMock,patch
 from tools import cloud_worker as cw
 from common import PipelineError
 class CloudWorkerTests(unittest.TestCase):
+ def test_bootstrap_uses_vietnam_dates_latest_sku_and_keeps_original_timestamps(self):
+  first={'slug':'cellphones','sku':'a','observed_at':'2026-10-06T18:00:00Z','promo_price':100}
+  last={**first,'observed_at':'2026-10-07T09:00:00+07:00','promo_price':None}
+  previous={**first,'observed_at':'2026-10-06T10:00:00+07:00'}
+  source={'slug':'cellphones','updated':'old'}
+  data={'rows':[first,last,previous,{**last,'slug':'tgdd'}],'sources':[source]}
+  snapshots=dict(cw.snapshot_payloads(data,'cellphones'))
+  self.assertEqual(list(snapshots),['2026-10-06','2026-10-07'])
+  self.assertEqual(snapshots['2026-10-07']['rows'],[last])
+  self.assertEqual(snapshots['2026-10-07']['source']['updated'],last['observed_at'])
+  self.assertEqual(source['updated'],'old')
+ def test_bootstrap_rejects_naive_timestamp_instead_of_inventing_day(self):
+  with self.assertRaises(PipelineError):
+   list(cw.snapshot_payloads({'rows':[{'slug':'tgdd','sku':'a','observed_at':'2026-10-07T10:00:00'}]},'tgdd'))
  def settings(self):return {'apple_colors':{'revision':1,'value':{'version':1,'products':[{'model':'iPhone 17 Pro Max','color':None,'aliases':[]}]}},'apple_models':{'value':{'models':[]}}}
  def test_price_and_snapshot_are_one_rpc_and_other_model_retained(self):
   db=MagicMock();db.rpc.return_value.execute.return_value.data='run-id'

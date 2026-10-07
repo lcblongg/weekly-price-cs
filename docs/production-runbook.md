@@ -39,10 +39,12 @@ on conflict(user_id) do update set role=excluded.role;
 Chuyển dữ liệu đã nghiệm thu từ máy hiện tại lên dự án **mới**, không ghi đè dữ liệu đã có:
 
 ```bash
-.venv/bin/python tools/cloud_worker.py --bootstrap --import-catalog --import-snapshot
+.venv/bin/python tools/env_runner.py --env-file .env tools/cloud_worker.py --bootstrap --import-catalog --import-snapshot
 ```
 
-Bootstrap giữ `observed_at` của từng SKU và ngày khám phá gốc; không tạo lịch sử giả.
+Lệnh trên nạp file `.env` vào môi trường tiến trình; chỉ tạo file `.env` không tự truyền khóa vào Python. Không dùng shell `source` cho file tải từ nguồn khác.
+
+Bootstrap giữ `observed_at` của từng SKU và ngày khám phá gốc, chia ngày theo múi giờ Việt Nam; không tạo lịch sử giả.
 Catalog local nằm trong `artifacts/`, không đưa lên GitHub. Nếu máy khác không có catalog này,
 chạy workflow discovery trước. Catalog quá 8 ngày sẽ bị từ chối để tránh cào trên danh sách quá cũ.
 Nếu import dừng giữa chừng, chạy lại sẽ bỏ qua cấu hình/catalog/snapshot đã có.

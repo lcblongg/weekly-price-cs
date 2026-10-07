@@ -13,6 +13,26 @@ COMMANDS={'tgdd':['tools/scrape_mw_apple.py'],'cellphones':['tools/scrape_cps_ap
 
 def read(path,default):return json.loads(path.read_text()) if path.exists() else default
 
+def snapshot_payloads(data,slug):
+ """Chia lịch sử theo ngày Việt Nam, giữ bản cuối mỗi SKU; không đổi timestamp nguồn."""
+ grouped={}
+ for row in data.get('rows',[]):
+  if row.get('slug')!=slug:continue
+  try:
+   stamp=datetime.fromisoformat(row['observed_at'].replace('Z','+00:00'))
+   if stamp.tzinfo is None:raise ValueError('Timestamp thiếu múi giờ')
+  except (KeyError,ValueError,TypeError) as exc:
+   raise PipelineError('Lịch sử có timestamp không hợp lệ; không nhập dữ liệu') from exc
+  day=stamp.astimezone(TZ).date().isoformat();records=grouped.setdefault(day,{})
+  previous=records.get(row['sku'])
+  if previous is None or stamp>previous[0]:records[row['sku']]=(stamp,row)
+ source=next((s for s in data.get('sources',[]) if s['slug']==slug),{})
+ for day,records in sorted(grouped.items()):
+  rows=[r for _,r in records.values()]
+  newest=max(records.values(),key=lambda item:item[0])[1]['observed_at']
+  yield day,{'rows':rows,'issues':[i for i in data.get('issues',[]) if i.get('slug')==slug],
+             'source':{**source,'updated':newest}}
+
 def configure(db):
  (ROOT/'artifacts').mkdir(parents=True,exist_ok=True)
  settings={r['key']:r for r in db.table('app_settings').select('*').execute().data}
@@ -170,12 +190,9 @@ def main(args):
   if args.import_snapshot:
    data=read(ROOT/'web/data/comparison.json',{})
    for slug,chain in CHAINS.items():
-    rows=[r for r in data.get('rows',[]) if r['slug']==slug]
-    for day in sorted({r['observed_at'][:10] for r in rows}):
-     payload={'rows':[r for r in rows if r['observed_at'][:10]==day],'issues':[i for i in data.get('issues',[]) if i.get('slug')==slug],'source':next((s for s in data.get('sources',[]) if s['slug']==slug),{})}
+    for day,payload in snapshot_payloads(data,slug):
      exists=db.table('dashboard_snapshots').select('id').eq('chain_name',chain).eq('business_date',day).execute().data
      if not exists:
-      payload['source']['updated']=max(r['observed_at'] for r in payload['rows'])
       history=[{**r,'chain_name':chain,'model_name':r['apple_model'],'variant_label':r.get('display_variant') or '', 'original_price':None} for r in payload['rows']]
       db.rpc('seed_dashboard_history',{'p_chain':chain,'p_date':day,'p_payload':payload,'p_rows':history}).execute()
   print('Khởi tạo cấu hình hoàn tất; không ghi đè cấu hình/snapshot đã có.');return
