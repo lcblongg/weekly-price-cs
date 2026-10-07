@@ -17,11 +17,21 @@ test('không tạo biến động cho NULL, ngày thiếu hoặc cùng một ng�
  const fresh={...q,promo_price:21000000,observed_at:'2026-10-07T11:00:00+07:00'};
  assert.equal(priceMovements([q,fresh,status],'2026-10-07')[0].delta,1000000);
 });
-test('tuần giữ ngày trống và so đầu/cuối thực tế; không gộp dung lượng hoặc kênh',()=>{
+test('tuần giữ ngày trống và so tuần này với tuần trước; không gộp dung lượng hoặc kênh',()=>{
  const days=['2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-09','2026-10-10','2026-10-11'];
  const fresh={...q,promo_price:19000000,observed_at:'2026-10-07T10:00:00+07:00'};
  const rows=[q,fresh,{...fresh,chain:'CPS'},{...fresh,storage:'256GB'}];
  assert.equal(dailySeries(rows).size,3);
  assert.equal([...dailySeries(rows).values()][0].has('2026-10-05'),false);
- const changes=priceMovements(rows,'2026-10-11',days);assert.equal(changes.length,1);assert.equal(changes[0].delta,-1000000);
+ assert.equal(priceMovements(rows,'2026-10-11',days).length,0);
+ const previous={...q,observed_at:'2026-10-01T10:00:00+07:00'};
+ const changes=priceMovements([...rows,previous],'2026-10-11',days);assert.equal(changes.length,1);assert.equal(changes[0].delta,-1000000);
+});
+
+test('ngày không lùi qua hôm qua bị thiếu; tuần không lấy giá số cũ đè trạng thái cuối tuần',()=>{
+ const fresh={...q,promo_price:19000000,observed_at:'2026-10-08T10:00:00+07:00'};
+ assert.equal(priceMovements([q,fresh],'2026-10-08').length,0);
+ const previous={...q,observed_at:'2026-10-04T10:00:00+07:00'},status={...fresh,promo_price:null};
+ const days=['2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-09','2026-10-10','2026-10-11'];
+ assert.equal(priceMovements([previous,q,status],'2026-10-11',days).length,0);
 });

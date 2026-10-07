@@ -19,11 +19,21 @@ async def main():
   await flash.locator('button').first.click();await page.locator('dialog[open]').wait_for()
   detail=await page.locator('dialog').inner_text();assert '6/10/2026' in detail and '7/10/2026' in detail and 'SKU' in detail
   await page.get_by_role('button',name='Đóng chi tiết',exact=True).click()
+  down=page.get_by_role('button',name='iPhone 17 256GB, MW: 25.490.000 ₫',exact=True).locator('..')
+  assert await down.evaluate('(el)=>getComputedStyle(el).backgroundColor')=='rgb(254, 236, 235)'
+  assert await down.evaluate('(el)=>getComputedStyle(el).color')=='rgb(180, 35, 24)'
+  up=page.get_by_role('button',name='iPhone 17 256GB, CPS: 26.490.000 ₫',exact=True).locator('..')
+  assert await up.evaluate('(el)=>getComputedStyle(el).backgroundColor')=='rgb(225, 243, 233)'
+  await page.screenshot(path=str(OUT/'daily-red-green.png'))
   await page.get_by_role('button',name='Theo tuần',exact=True).click()
-  table=page.get_by_role('table',name='Biến động giá đủ 7 ngày')
-  assert await table.locator('thead th').count()==10
+  table=page.get_by_role('table',name='So sánh tuần này với tuần trước')
+  assert await table.locator('thead th').count()==5
+  assert 'Chưa có dữ liệu tuần trước' in await table.inner_text()
+  assert '3.500.000' not in await flash.inner_text()
+  await page.get_by_role('button',name='Xem chi tiết 7 ngày',exact=True).click()
+  assert await table.locator('thead th').count()==12
   text=await table.inner_text();assert all(d in text for d in ['05/10','06/10','07/10','08/10','09/10','10/10','11/10'])
-  assert 'Chưa có dữ liệu' in text and '3.500.000' in text
+  assert 'Chưa có dữ liệu' in text and 'Chưa có dữ liệu tuần trước' in text
   assert await page.get_by_label('Chọn tuần',exact=True).count()==1
   await page.screenshot(path=str(OUT/'week-and-flash.png'))
   await page.get_by_label('Chọn kênh',exact=True).select_option('CPS')
@@ -39,9 +49,9 @@ async def main():
   assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
   await page.screenshot(path=str(OUT/'mobile.png'))
   await page.goto('http://localhost:3000/history',wait_until='networkidle')
-  assert await page.get_by_role('table',name='Biến động giá đủ 7 ngày').count()==1
+  assert await page.get_by_role('table',name='So sánh tuần này với tuần trước').count()==1
   assert await page.get_by_role('button',name='Xuất Excel',exact=True).count()==0
   assert not errors,errors
-  (OUT/'result.json').write_text(json.dumps({'passed':True,'checks':['no Excel','real MW iPhone17 -3500000','two-date SKU detail','7 simultaneous days','missing days explicit','chain filter','watchlist filters alerts/week','mobile','history uses current data'],'errors':errors},ensure_ascii=False,indent=2))
+  (OUT/'result.json').write_text(json.dumps({'passed':True,'checks':['no Excel','real MW iPhone17 -3500000','two-date SKU detail','week vs prior week; no fake baseline','7 simultaneous detail days','daily red decrease/green increase','missing days explicit','chain filter','watchlist filters alerts/week','mobile','history uses current data'],'errors':errors},ensure_ascii=False,indent=2))
   await browser.close();print('PASS: real flash, seven-day history, filters/watchlist, mobile, no Excel')
 asyncio.run(main())

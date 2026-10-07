@@ -1,10 +1,11 @@
+import {addDays} from '@/lib/calendar';
 import {createHash} from 'node:crypto';
 import {comparisonPage} from '@/lib/comparison-page';
 import {authorize,cloudError} from '@/lib/cloud-admin';
 export const dynamic='force-dynamic';
 export async function GET(request:Request){try{
  const {db}=await authorize(request);const params=new URL(request.url).searchParams;const start=params.get('start');const offset=Number(params.get('offset')??0);if(!Number.isSafeInteger(offset)||offset<0||offset>100000)return Response.json({error:'Offset không hợp lệ.'},{status:400});let query=db.from('dashboard_snapshots').select('id,chain_name,business_date,completed_at,payload').order('business_date',{ascending:false}).order('chain_name');
- if(start){if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||Number.isNaN(Date.parse(start)))return Response.json({error:'Ngày không hợp lệ.'},{status:400});const end=new Date(start+'T00:00:00Z');end.setUTCDate(end.getUTCDate()+6);query=query.gte('business_date',start).lte('business_date',end.toISOString().slice(0,10));}else query=query.limit(35);
+ if(start){if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||Number.isNaN(Date.parse(start)))return Response.json({error:'Ngày không hợp lệ.'},{status:400});const end=new Date(start+'T00:00:00Z');end.setUTCDate(end.getUTCDate()+6);query=query.gte('business_date',addDays(start,-7)).lte('business_date',end.toISOString().slice(0,10));}else query=query.limit(35);
  const {data,error}=await query;if(error)throw error;const settings=await db.from('app_settings').select('key,value,revision').in('key',['apple_colors','apple_models']).order('key');if(settings.error)throw settings.error;
  const generation=createHash('sha256').update(JSON.stringify([(data??[]).map(s=>[s.id,s.completed_at]),settings.data.map(s=>[s.key,s.revision])])).digest('hex');if(params.get('generation')&&params.get('generation')!==generation)return Response.json({error:'Snapshot đã thay đổi trong lúc tải.'},{status:409});
  const prefs=settings.data.find(r=>r.key==='apple_colors')?.value??{version:1,products:[]};const rules=settings.data.find(r=>r.key==='apple_models')?.value?.models??[];const key=(v:unknown)=>String(v??'').normalize('NFC').trim().toLowerCase();const meta:Record<string,{brand:string;category:string}>={};const rows:Record<string,unknown>[]=[];const issues:Record<string,unknown>[]=[];const sources:Record<string,unknown>[]=[];const seen=new Set<string>(),sourceSeen=new Set<string>();
@@ -13,5 +14,5 @@ export async function GET(request:Request){try{
  const id=JSON.stringify([r.slug,r.sku,r.observed_at]);if(!seen.has(id)){seen.add(id);rows.push(r);meta[r.apple_model]={brand:r.brand,category:r.category};}}issues.push(...(payload.issues??[]));if(payload.source&&!sourceSeen.has(snap.chain_name)){sourceSeen.add(snap.chain_name);sources.push(payload.source);}}
  for(const r of prefs.products)meta[r.model]??={brand:'Apple',category:r.model.startsWith('iPhone')?'Điện thoại':r.model.startsWith('iPad')?'Máy tính bảng':r.model.startsWith('Apple Watch')?'Đồng hồ thông minh':r.model.startsWith('AirPods')?'AirPods':'Máy tính xách tay'};
  const models=[...prefs.products.map((r:{model:string})=>r.model),...Object.keys(meta).filter(m=>!prefs.products.some((r:{model:string})=>r.model===m)).sort()];
- if(offset>rows.length)return Response.json({error:'Offset vượt phạm vi dữ liệu.'},{status:400});return Response.json(comparisonPage({rows,issues,sources,models,model_meta:meta,preferences:prefs,generation},offset),{headers:{'Cache-Control':'no-store'}});
+ if(offset>rows.length)return Response.json({error:'Offset vượt phạm vi dữ liệu.'},{status:400});return Response.json(comparisonPage({rows,issues,sources,models,model_meta:meta,preferences:prefs,view_start:start,generation},offset),{headers:{'Cache-Control':'no-store'}});
 }catch(e){return cloudError(e);}}

@@ -52,7 +52,7 @@ async def main():
   await page.get_by_label('Chọn kênh',exact=True).select_option('CPS')
   assert await page.locator('thead th').all_text_contents()==['BASE MODEL','CPS']
   await page.get_by_role('button',name='Theo tuần',exact=True).click()
-  assert await page.get_by_role('table',name='Biến động giá đủ 7 ngày').locator('thead th').count()==10
+  assert await page.get_by_role('table',name='So sánh tuần này với tuần trước').locator('thead th').count()==5
   await page.get_by_role('button',name='Sản phẩm theo dõi',exact=True).click()
   await page.get_by_role('button',name='Khôi phục mặc định',exact=True).click()
   await page.wait_for_function("JSON.parse(localStorage.getItem('weekly-price-cs:watchlist:v1')).hidden.length===0")
