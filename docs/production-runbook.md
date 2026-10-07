@@ -89,9 +89,10 @@ GITHUB_WORKFLOW_REF=main
 NEXT_PUBLIC_PUBLIC_VIEW=true
 ```
 
-`NEXT_PUBLIC_PUBLIC_VIEW=true`: `/api/comparison` và `/api/watchlist` (GET) trả dữ liệu đã công bố cho khách, chỉ xem.
-"Sản phẩm theo dõi" là danh sách dùng chung (`app_settings.public_watchlist`): chỉ admin đăng nhập mới thấy nút và
-bật/tắt model; mọi người xem Web thấy đúng danh sách đó. Quản lý Apple, job cập nhật giá và mọi API ghi vẫn bắt buộc admin.
+`NEXT_PUBLIC_PUBLIC_VIEW=true`: `/api/comparison` trả snapshot đã công bố cho khách, chỉ xem. Bảng giá live chỉ hiện các
+model Apple trong danh sách **Sản phẩm theo dõi** (`app_settings.apple_colors`, trang `/apple-products`, chỉ admin): thêm model + màu,
+xoá model, rồi bấm "Xác minh và cập nhật giá" hoặc chờ lượt chạy hằng ngày. Thêm/xoá trên cloud cần `GITHUB_ACTIONS_TOKEN`.
+Mọi API ghi vẫn bắt buộc admin (nút "Đăng nhập quản trị").
 Tắt: đặt `false` (hoặc xóa biến) rồi Redeploy — biến `NEXT_PUBLIC_*` chỉ có hiệu lực sau khi build lại.
 
 Token GitHub chỉ cấp repository này và quyền **Actions: write**, Metadata: read;
