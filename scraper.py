@@ -102,8 +102,11 @@ def load_catalog(args, chain):
             meta = {'run_id': None, 'total': len(data), 'ready': len(items), 'review': len(review)}
         else:
             items, review, meta = [item for item in data if item.get('chain_name') == chain], [], None
-    items = [item for item in items if item['chain_name'] == chain]
-    review = [row for row in review if row['chain_name'] == chain]
+    from scope import brands, in_scope
+    allowed = brands()
+    # Catalog cũ có thể còn hãng ngoài phạm vi (config/scope.json): bỏ trước khi đọc giá.
+    items = [item for item in items if item['chain_name'] == chain and in_scope(item.get('brand'), allowed)]
+    review = [row for row in review if row['chain_name'] == chain and in_scope((row.get('config') or {}).get('brand') or row.get('brand'), allowed)]
     # Kiểm tra trùng SKU/link trên TOÀN BỘ catalog trước khi lấy mẫu, để mẫu không che lỗi trùng.
     if items:validate_items(items)
     elif not review:raise PipelineError('Catalog không có link để đọc')

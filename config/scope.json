@@ -1,0 +1,5 @@
+{
+ "version": 1,
+ "brands": ["Apple"],
+ "note": "Phạm vi bot: chỉ cào nguồn/link của các hãng này (iPhone, iPad, MacBook, Apple Watch, AirPods). Excel inputs/data.xlsx giữ nguyên; xóa danh sách brands (\"brands\": []) để cào lại mọi hãng."
+}

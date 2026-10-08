@@ -309,6 +309,9 @@ async def run(args):
         from import_sources import prepare
         sources = prepare(args.input, args.adapters, output_dir=None)  # không ghi file dùng chung giữa các worker
     validate_sources(sources)
+    from scope import brands, in_scope
+    allowed = brands()
+    sources = [s for s in sources if in_scope(s.get('brand'), allowed)]  # config/scope.json: chỉ hãng trong phạm vi
     if args.limit_sources:
         if not args.dry_run or args.limit_sources < 1:
             raise PipelineError('--limit-sources chỉ dùng cho dry-run và phải > 0')

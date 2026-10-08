@@ -1,11 +1,13 @@
 """Worker theo kênh: chọn kênh, đầu ra độc lập, lỗi cô lập, tổng hợp báo cáo, toàn vẹn dữ liệu. Không gọi mạng."""
 import asyncio
+import os
 import json
 import tempfile
 import unittest
 from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
+os.environ['WPCS_SCOPE'] = 'all'  # dữ liệu mẫu nhiều hãng; bộ lọc Apple kiểm thử ở test_scope.py
 
 import apple_jobs
 import discover_products

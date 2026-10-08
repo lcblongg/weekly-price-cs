@@ -44,7 +44,7 @@ async def main():
   for rule in config['products']:
    if selected_models and rule['model'] not in selected_models:continue
    manual=manual_urls(rule,'tgdd')  # URL nhập tay: nguồn đầu vào, vẫn xác minh model/màu như link discovery
-   urls=list(dict.fromkeys(groups.get(rule['model'],[])+manual));count_before=len(rows);problems=[]
+   urls=list(dict.fromkeys(([] if os.environ.get('WPCS_SELECTED_ONLY')=='1' else groups.get(rule['model'],[]))+manual))  # WPCS_SELECTED_ONLY=1: chỉ URL đã chọn;count_before=len(rows);problems=[]
    if not urls:states.append({'model':rule['model'],'color':rule['color'],'status':'missing_catalog','records':0});publish('running');continue
    visited=set()
    for url in urls:

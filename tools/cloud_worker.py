@@ -37,7 +37,10 @@ def configure(db):
  (ROOT/'artifacts').mkdir(parents=True,exist_ok=True)
  settings={r['key']:r for r in db.table('app_settings').select('*').execute().data}
  if 'apple_colors' not in settings or 'apple_models' not in settings:raise PipelineError('Chưa khởi tạo quy chuẩn trên Supabase')
- for key in ('apple_colors','apple_models'):(ROOT/f'config/{key}.json').write_text(json.dumps(settings[key]['value'],ensure_ascii=False))
+ # Trên máy vận hành không ghi đè config/ trong Git: dùng bản chép ở out/settings qua biến môi trường.
+ folder=ROOT/'config' if os.environ.get('GITHUB_ACTIONS')=='true' else ROOT/'out/settings';folder.mkdir(parents=True,exist_ok=True)
+ for key in ('apple_colors','apple_models'):(folder/f'{key}.json').write_text(json.dumps(settings[key]['value'],ensure_ascii=False))
+ os.environ['WPCS_APPLE_MODELS']=str(folder/'apple_models.json');os.environ.setdefault('WPCS_APPLE_COLORS',str(folder/'apple_colors.json'))
  if 'telegram_watchlist' in settings:(ROOT/'config/telegram-watchlist.json').write_text(json.dumps(settings['telegram_watchlist']['value'],ensure_ascii=False))
  return settings
 
@@ -116,13 +119,14 @@ def work(db,job,settings):
     chosen={**prefs,'products':[rule]}
    conf=ROOT/f'out/config/{slug}.json';conf.parent.mkdir(parents=True,exist_ok=True);conf.write_text(json.dumps(chosen,ensure_ascii=False))
    out=ROOT/f'out/apple/{slug}';env={**os.environ,'WPCS_APPLE_COLORS':str(conf),'WPCS_APPLE_OUT_DIR':str(out)}
+   if payload.get('selected_links'):env['WPCS_SELECTED_ONLY']='1'  # chỉ đọc đúng link trong file chọn
    command=COMMANDS[slug]+([payload['model']] if slug=='tgdd' and kind=='verify_prices' else [])
    result=run(command,env);selected=out/FOLDERS[slug];raw=read(selected/'prices.json',[]);issues=read(selected/'issues.json',[]);summary=read(selected/'summary.json',{})
    for state in summary.get('models',[]):
     if state.get('status')=='missing_catalog':issues.append({'stage':'catalog','chain_name':CHAINS[slug],'product_name':state['model'],'model_name':state['model'],'source_url':'https://'+{'tgdd':'www.thegioididong.com','cellphones':'cellphones.com.vn','fpt':'fptshop.com.vn','viettel':'viettelstore.vn','phongvu':'phongvu.vn'}[slug],'reason':'Model theo quy chuẩn chưa có link trong catalog; chưa xác minh giá/màu.'})
    if result.returncode!=0:issues.append({'stage':'price','chain_name':CHAINS[slug],'sku':'','product_name':payload.get('model',''),'source_url':'https://'+{'tgdd':'www.thegioididong.com','cellphones':'cellphones.com.vn','fpt':'fptshop.com.vn','viettel':'viettelstore.vn','phongvu':'phongvu.vn'}[slug],'reason':'Worker chọn màu lỗi; chưa bảo đảm đọc đủ model Apple'})
    catalog_raw=[]
-   if kind=='daily_prices':
+   if kind=='daily_prices' and not payload.get('selected_links'):
     # Thu thập toàn catalog ở chế độ dry-run, rồi một transaction lưu giá đã chọn + lỗi đầy đủ.
     base=run(['scraper.py','--chain',slug,'--catalog','discovery','--out','out/prices','--dry-run'])
     directory=ROOT/f'out/prices/{slug}';generic=read(directory/'prices.json',[]);catalog_raw=list(generic);issues+=read(directory/'issues.json',[])
@@ -198,7 +202,7 @@ def main(args):
   print('Khởi tạo cấu hình hoàn tất; không ghi đè cấu hình/snapshot đã có.');return
  if args.job_id:uuid.UUID(args.job_id);job_id=args.job_id
  else:
-  job_id=str(uuid.uuid4());db.table('automation_jobs').insert({'id':job_id,'kind':args.kind,'payload':{'channels':args.chains.split(',') if args.chains!='all' else list(CHAINS),'send_report':args.send_report},'lease_until':(datetime.now(TZ)+timedelta(hours=6)).isoformat()}).execute()
+  job_id=str(uuid.uuid4());db.table('automation_jobs').insert({'id':job_id,'kind':args.kind,'payload':{'channels':args.chains.split(',') if args.chains!='all' else list(CHAINS),'send_report':args.send_report,'selected_links':args.selected_links},'lease_until':(datetime.now(TZ)+timedelta(hours=6)).isoformat()}).execute()
  job=db.rpc('claim_automation_job',{'p_id':job_id}).execute().data
  stop=threading.Event()
  def heartbeat():
@@ -211,6 +215,6 @@ def main(args):
  finally:stop.set();beat.join(timeout=2)
 
 if __name__=='__main__':
- parser=argparse.ArgumentParser();parser.add_argument('--job-id');parser.add_argument('--kind',choices=['daily_prices','discovery']);parser.add_argument('--chains',default='all');parser.add_argument('--send-report',action='store_true');parser.add_argument('--bootstrap',action='store_true');parser.add_argument('--import-snapshot',action='store_true');parser.add_argument('--import-catalog',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--job-id');parser.add_argument('--kind',choices=['daily_prices','discovery']);parser.add_argument('--chains',default='all');parser.add_argument('--send-report',action='store_true');parser.add_argument('--bootstrap',action='store_true');parser.add_argument('--import-snapshot',action='store_true');parser.add_argument('--import-catalog',action='store_true');parser.add_argument('--selected-links',action='store_true',help='Chỉ đọc link trong file chọn (quy chuẩn hiện tại), không quét catalog');args=parser.parse_args()
  if not(args.job_id or args.kind or args.bootstrap):parser.error('Cần job ID, kind hoặc bootstrap')
  raise SystemExit(main(args) or 0)

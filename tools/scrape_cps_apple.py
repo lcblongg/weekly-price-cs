@@ -39,7 +39,7 @@ async def main():
      manual[(rule['model'],url)]=exc;apple_sources.record(rule['model'],'cellphones',url,apple_sources.classify(exc),str(exc),rule['color'],'worker')
  now=datetime.now(TZ).isoformat();rows=[];issues=[];states=[];seen=set()
  for rule in config['products']:
-  candidates=[p for p in parents.values() if model_of(p['general']['name'])==rule['model']];before=len(rows);problems=[]
+  candidates=[] if os.environ.get('WPCS_SELECTED_ONLY')=='1' else [p for p in parents.values() if model_of(p['general']['name'])==rule['model']];before=len(rows);problems=[]
   manual_parents={pid for (m,u),pid in manual.items() if m==rule['model'] and isinstance(pid,str)}
   # Sản phẩm cha từ URL nhập tay vẫn đi qua selected_quote: sai model → lỗi, không bị lọc âm thầm.
   candidates+=[parents[pid] for pid in manual_parents if parents[pid] not in candidates];selected_by_parent={}

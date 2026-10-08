@@ -78,7 +78,7 @@ async def run(slug,browser):
  publish('running')
  async with client(timeout=35) as http:
   for rule in config['products']:
-   sources=[r for r in catalog if canonical_model(r['config'].get('source_product_name') or r['config'].get('product_name') or r['config'].get('discovered_name'))==rule['model']];before=len(rows);problems=[]
+   sources=[] if os.environ.get('WPCS_SELECTED_ONLY')=='1' else [r for r in catalog if canonical_model(r['config'].get('source_product_name') or r['config'].get('product_name') or r['config'].get('discovered_name'))==rule['model']];before=len(rows);problems=[]
    # URL nhập tay đi cùng luồng palette → chọn màu → đọc giá → đối chiếu SKU/model/màu như link discovery.
    manual_set=set(apple_rules.manual_urls(rule,slug));known={r['source_url'] for r in sources};sources+=[r for r in apple_sources.manual_records(rule,slug) if r['source_url'] not in known]
    for record in sources:

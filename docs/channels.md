@@ -13,6 +13,15 @@ mất kết quả kênh khác.
 | `fpt` | FPT Shop | `adapters/fptshop.py` | API `papi.fptshop.com.vn/.../category`; chi tiết server-render `?sku=` |
 | `phongvu` (`pv`) | Phong Vũ | `adapters/phongvu.py` | API tìm kiếm Teko; chi tiết `__NEXT_DATA__` |
 
+**Phạm vi hãng** — `config/scope.json` (`scope.py`): hiện chỉ **Apple** (iPhone, iPad, MacBook, Apple Watch, AirPods).
+Discovery chỉ dùng 24/86 nguồn Excel có Hãng = Apple (Viettel không có nguồn MacBook); worker giá bỏ link ngoài phạm vi
+kể cả khi catalog cũ còn hãng khác. `inputs/data.xlsx` giữ nguyên; đặt `"brands": []` để cào lại mọi hãng.
+Kiểm thử dữ liệu mẫu nhiều hãng dùng `WPCS_SCOPE=all`.
+
+**Nơi chạy** — FPT Shop và Phong Vũ trả HTTP 403 với IP máy chủ GitHub (Azure) ngay từ `robots.txt`; MW không đọc được
+bản ghi Apple đúng màu. Chỉ CellphoneS/Viettel đọc được từ GitHub-hosted runner (lượt 07/10/2026). Bot cần chạy
+trên máy/mạng được các website chấp nhận (máy Mac vận hành), không đổi User-Agent hay né chặn.
+
 ## Lệnh chạy
 
 ```bash
