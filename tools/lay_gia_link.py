@@ -79,6 +79,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--file', default=str(CHOICE))
     parser.add_argument('--khong-gui-telegram', action='store_true', help='Chạy thử: lưu web nhưng không gửi nhóm')
+    parser.add_argument('--kenh', default='all', help='Chỉ chạy một số kênh: tgdd,cellphones,fpt,viettel,phongvu (mặc định cả 5)')
     parser.add_argument('--chi-kiem-tra', action='store_true', help='Chỉ đọc và kiểm tra file chọn, không đổi gì')
     args = parser.parse_args()
     try:
@@ -107,10 +108,10 @@ def main():
         print(f'Đã cập nhật danh sách Sản phẩm theo dõi ({len(products)} model). Bản cũ lưu ở {backup.name}', flush=True)
     else:
         print('Danh sách Sản phẩm theo dõi không đổi', flush=True)
-    command = [sys.executable, 'tools/cloud_worker.py', '--kind', 'daily_prices', '--chains', 'all', '--selected-links']
+    command = [sys.executable, 'tools/cloud_worker.py', '--kind', 'daily_prices', '--chains', args.kenh, '--selected-links']
     if not args.khong_gui_telegram:
         command.append('--send-report')
-    print('Đang lấy giá 5 kênh theo đúng link đã chọn…', flush=True)
+    print(('Đang lấy giá 5 kênh' if args.kenh == 'all' else 'Đang lấy giá kênh ' + args.kenh) + ' theo đúng link đã chọn (5 bot chạy song song, kênh lỗi không ảnh hưởng kênh khác)…', flush=True)
     return subprocess.run(command, cwd=ROOT).returncode
 
 
