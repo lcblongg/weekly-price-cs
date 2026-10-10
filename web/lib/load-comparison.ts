@@ -1,9 +1,9 @@
 // Tải đủ trang, giữ một generation nhất quán; không đưa snapshot dở dang lên UI/Excel.
-export async function loadComparison<T extends {rows:unknown[]}>(start:string,signal:AbortSignal,fetcher:(url:string,init?:RequestInit)=>Promise<Response>=fetch):Promise<T>{
+export async function loadComparison<T extends {rows:unknown[]}>(start:string,signal:AbortSignal,fetcher:(url:string,init?:RequestInit)=>Promise<Response>=fetch,scope?:'tracked'):Promise<T>{
  for(let attempt=0;attempt<3;attempt++){
   let offset=0,generation='',result:T|undefined;const rows:unknown[]=[];let changed=false;
   while(true){
-   const q=new URLSearchParams({start,offset:String(offset)});if(generation)q.set('generation',generation);
+   const q=new URLSearchParams({start,offset:String(offset)});if(scope)q.set('scope',scope);if(generation)q.set('generation',generation);
    const response=await fetcher('/api/comparison?'+q,{signal});
    if(response.status===409){changed=true;break;}
    const data=await response.json();if(!response.ok)throw Error(data.error||'Không tải được bảng giá.');

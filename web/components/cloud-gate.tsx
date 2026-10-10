@@ -18,6 +18,7 @@ export default function CloudGate({children,admin=false,optional=false}:{childre
   try{const {data}=supabase().auth.onAuthStateChange(()=>{setTimeout(()=>{if(!stopped)void update();},0);});unsubscribe=()=>data.subscription.unsubscribe();}catch{setError('Chưa cấu hình Supabase.');setLoading(false);}
   void update();return()=>{stopped=true;unsubscribe();};
  },[]);
+ if(loading&&optional&&!admin)return <Auth.Provider value={member}>{children}</Auth.Provider>;
  if(loading)return <main className={s.page}>Đang kiểm tra phiên đăng nhập…</main>;
  if(!member&&optional&&!admin)return <Auth.Provider value={null}>{children}</Auth.Provider>;
  if(member){if(admin&&member.role!=='admin')return <main className={s.page}><h1>Bạn chưa có quyền quản trị</h1><a href="/">Về bảng giá</a></main>;return <Auth.Provider value={member}>{children}</Auth.Provider>;}

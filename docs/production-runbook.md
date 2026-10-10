@@ -160,3 +160,20 @@ tools/test_postgres.sh
 - FPT/PV đã trả HTTP 403 từ runner GitHub trong lượt 07/10. Không vượt chặn; giá cũ giữ thời điểm cũ.
   Nếu vẫn bị chặn, cần runner hợp lệ khác và kiểm chứng lại; không thể cam kết 5 kênh đều có giá mới.
 - Repo hiện public; không đưa secrets hoặc artifacts nội bộ vào Git.
+
+
+## Bảng giá Apple và tốc độ tải (10/10/2026)
+
+Bảng công khai và API công khai chỉ trả các model Apple trong danh sách theo dõi.
+Giữ iPhone/iPad/MacBook/Apple Watch/AirPods; bot đọc `config/scope.json` chỉ Apple.
+Dữ liệu lịch sử hãng khác giữ nguyên trong DB; chưa có thao tác xóa lịch sử.
+Không hiện bộ lọc hãng khi dữ liệu chỉ có Apple.
+
+API rút gọn trước phân trang, chuẩn bị regex một lần và tải snapshot/quy chuẩn song song.
+Snapshot rút gọn được nén trong cache server, thời gian revalidate 30 giây; phản hồi vẫn giữ timestamp nguồn.
+Cache Next.js có thể trả bản trước trong lúc làm mới sau TTL; không thay timestamp hoặc lấp ngày thiếu.
+Generation vẫn kiểm tra mọi trang để tránh ghép hai lượt dữ liệu.
+Khách xem giá không chờ Supabase Auth; trang quản trị vẫn xác thực đầy đủ.
+`web/vercel.json` đặt một region Tokyo (`hnd1`), cùng vùng Supabase.
+Xem [cấu hình region Vercel](https://vercel.com/docs/project-configuration/vercel-json).
+Phép đo trước sửa: 23,07 giây / 5 request API trên Chromium mobile; cần đo lại production sau deploy.
