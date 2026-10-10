@@ -182,15 +182,14 @@ Phép đo trước sửa: 23,07 giây / 5 request API trên Chromium mobile; c�
 ## Bấm chạy trên Mac → tự cập nhật web
 
 Mã nằm trong `weekly-price-cs/Data/`; file `.env` ở Data, không đưa khóa vào hội thoại/Git.
-Hai nút ở thư mục `weekly-price-cs/` (cũng có bản trong Data):
-
-- **Cap nhat web.command**: đọc quy chuẩn Apple đã lưu trên Supabase → cào 5 kênh trên Mac → RPC lưu lịch sử và bảng giá.
-- **Tim link va cap nhat web.command**: discovery trên Mac trước, rồi lấy giá; dùng khi catalog cũ hoặc thêm model chưa có link.
+Nút duy nhất ở thư mục `weekly-price-cs/`: **Chay bot.command** (cũng có bản trong Data).
+Đọc `weekly-price-cs/data.xlsx` với 5 cột URL → xác minh model/SKU/màu → lưu Supabase và cập nhật web.
+Xem [hướng dẫn một file](data-file-bot.md). Không discovery hoặc chụp ảnh trong luồng này.
+Các launcher cũ đã được bỏ để tránh chọn nhầm luồng đầu vào hoặc gửi Telegram.
 
 Giữ Terminal mở và máy có Internet. `caffeinate -i` giữ máy không ngủ do nhàn rỗi;
 không đóng nắp máy trong lượt chạy. Web tự làm mới mỗi phút; cache server có thể thêm một khoảng trễ.
 Không cần deploy web sau mỗi lượt giá. Các lượt local này **không gửi Telegram**.
-Không dùng `Lay gia.command` nếu muốn giữ nguyên danh sách trên web: nút cũ đọc `inputs/chon-link.xlsx` và có thể thay quy chuẩn.
 
 Nút mới dùng khóa file local, kiểm tra worker CLI và hàng đợi Supabase; chờ lượt đang chạy,
 không dừng GitHub. Unique index/RPC trong DB ngăn công bố chồng, giữ timestamp nguồn, chỉ công bố SKU/màu đúng.
