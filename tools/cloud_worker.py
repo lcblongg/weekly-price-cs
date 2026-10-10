@@ -161,8 +161,10 @@ def work(db,job,settings):
    return {'label':LABELS[slug],'status':'partial' if issues else 'success','priced':sum(r['promo_price'] is not None for r in fresh),'status_only':sum(r['promo_price'] is None for r in fresh),'needs_check':len(issues),'published':True}
   except Exception as exc:return {'label':LABELS[slug],'status':'error','reason':str(exc) if isinstance(exc,PipelineError) else type(exc).__name__,'published':False}
  def thread(slug):
+  print(f"{LABELS[slug]}: bắt đầu {kind}",flush=True)
   with lock:results[slug]={'label':LABELS[slug],'status':'running'};update(db,job,result={'channels':results})
   result=one(slug)
+  print(f"{LABELS[slug]}: {result['status']} · {result.get('priced',0)} SKU có giá · {result.get('status_only',0)} chỉ trạng thái · {result.get('needs_check',0)} cần kiểm tra",flush=True)
   with lock:results[slug]=result;update(db,job,result={'channels':results})
  threads=[threading.Thread(target=thread,args=(s,)) for s in channels]
  for t in threads:t.start()
