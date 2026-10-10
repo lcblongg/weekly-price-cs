@@ -16,6 +16,8 @@ export async function enqueue(request:Request,kind:string,payload:unknown){
  await db.from('automation_jobs').update({status:'error',finished_at:new Date().toISOString(),result:{error:'Job hết thời gian; không xác nhận đã cập nhật'}}).in('status',['pending','running']).lt('lease_until',new Date().toISOString());
  const {data:job,error}=await db.from('automation_jobs').insert({kind,payload,requested_by:userId,lease_until:new Date(Date.now()+6*3600000).toISOString()}).select().single();
  if(error){if(error.code==='23505')return Response.json({error:'Đang có một lượt chạy; chờ hoàn tất rồi thử lại.'},{status:409});throw error;}
+ // GitHub nhận hàng đợi định kỳ; token chỉ giúp khởi chạy ngay.
+ if(!process.env.GITHUB_ACTIONS_TOKEN)return Response.json({ok:true,queued:true,job,message:'Đã xếp hàng; GitHub sẽ tự nhận yêu cầu trong lượt kiểm tra định kỳ (dự kiến 10 phút, có thể trễ).'}, {status:202});
  try{
   const repo=process.env.GITHUB_REPOSITORY,token=process.env.GITHUB_ACTIONS_TOKEN,ref=process.env.GITHUB_WORKFLOW_REF||'main';if(!repo||!token||!/^[-\w.]+\/[-\w.]+$/.test(repo))throw Error('Chưa cấu hình GitHub runner');
   const r=await fetch(`https://api.github.com/repos/${repo}/actions/workflows/cloud_job.yml/dispatches`,{method:'POST',signal:AbortSignal.timeout(15000),headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},body:JSON.stringify({ref,inputs:{job_id:job.id}})});

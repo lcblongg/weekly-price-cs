@@ -1,3 +1,7 @@
+> Mã local hiện ở `weekly-price-cs/Data/`. Cloud: xem `docs/production-runbook.md`.
+> Hàng đợi quản trị được GitHub kiểm tra mỗi 10 phút; lưu quy chuẩn Apple tự nối discovery và cập nhật giá.
+> Việc chạy theo lịch phụ thuộc `PRODUCTION_ENABLED`; không coi HTTP 403 hoặc job bị hủy là thành công.
+
 # Weekly Price CS — trạng thái và triển khai hiện tại
 
 Bản local đã có dashboard và bot 5 kênh. Luồng cloud dùng Supabase Auth, phân quyền admin/CS và GitHub Actions.

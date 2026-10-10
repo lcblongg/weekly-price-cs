@@ -176,6 +176,30 @@ def work(db,job,settings):
  overall='success' if all(r['status']=='success' for r in results.values()) else 'error' if all(r['status']=='error' for r in results.values()) else 'partial'
  return {'channels':results,'dashboard_rebuilt':any(r.get('published') for r in results.values())},overall
 
+def expire_jobs(db):
+ """Thu hồi lease hết hạn; runner cũ không thể công bố qua RPC sau đó."""
+ now=datetime.now(TZ).isoformat()
+ db.table('automation_jobs').update({'status':'error','finished_at':now}).in_('status',['pending','running']).lt('lease_until',now).execute()
+
+
+def pending_job(db):
+ expire_jobs(db)
+ rows=db.table('automation_jobs').select('id').eq('status','pending').order('created_at').limit(1).execute().data
+ return rows[0]['id'] if rows else None
+
+
+def followup(db,job,status,result):
+ """Nối lưu quy chuẩn → discovery → giá; mỗi bước một job, chung khóa DB."""
+ if status not in ('success','partial'):return
+ kind='discovery' if job['kind']=='config_update' else 'daily_prices' if job['kind']=='discovery' and job['payload'].get('auto_prices') else None
+ if not kind:return
+ payload={'channels':job['payload'].get('channels') or list(CHAINS),'send_report':False,'auto_prices':kind=='discovery'}
+ try:
+  db.table('automation_jobs').insert({'kind':kind,'payload':payload,'lease_until':(datetime.now(TZ)+timedelta(hours=6)).isoformat()}).execute()
+ except Exception:
+  db.table('automation_jobs').update({'result':{**result,'followup_warning':'Không xếp được bước tiếp theo; chờ lịch hoặc chạy lại sau job đang chờ.'}}).eq('id',job['id']).execute()
+
+
 def main(args):
  db=database()
  if args.bootstrap:
@@ -200,8 +224,12 @@ def main(args):
       history=[{**r,'chain_name':chain,'model_name':r['apple_model'],'variant_label':r.get('display_variant') or '', 'original_price':None} for r in payload['rows']]
       db.rpc('seed_dashboard_history',{'p_chain':chain,'p_date':day,'p_payload':payload,'p_rows':history}).execute()
   print('Khởi tạo cấu hình hoàn tất; không ghi đè cấu hình/snapshot đã có.');return
- if args.job_id:uuid.UUID(args.job_id);job_id=args.job_id
+ if getattr(args,"pending",False):
+  job_id=pending_job(db)
+  if not job_id:print("Không có yêu cầu đang chờ.");return 0
+ elif args.job_id:uuid.UUID(args.job_id);job_id=args.job_id
  else:
+  expire_jobs(db)
   job_id=str(uuid.uuid4());db.table('automation_jobs').insert({'id':job_id,'kind':args.kind,'payload':{'channels':args.chains.split(',') if args.chains!='all' else list(CHAINS),'send_report':args.send_report,'selected_links':args.selected_links},'lease_until':(datetime.now(TZ)+timedelta(hours=6)).isoformat()}).execute()
  job=db.rpc('claim_automation_job',{'p_id':job_id}).execute().data
  stop=threading.Event()
@@ -210,11 +238,11 @@ def main(args):
    try:db.table('automation_jobs').update({'heartbeat_at':datetime.now(TZ).isoformat(),'lease_until':(datetime.now(TZ)+timedelta(hours=6)).isoformat()}).eq('id',job_id).eq('status','running').execute()
    except Exception:pass
  beat=threading.Thread(target=heartbeat,daemon=True);beat.start()
- try:settings=configure(db);result,status=work(db,job,settings);update(db,job,status,result);print(json.dumps({'id':job_id,'status':status,'result':result},ensure_ascii=False));return 1 if status=='error' else 0
+ try:settings=configure(db);result,status=work(db,job,settings);update(db,job,status,result);followup(db,job,status,result);print(json.dumps({'id':job_id,'status':status,'result':result},ensure_ascii=False));return 1 if status=='error' else 0
  except Exception as exc:update(db,job,'error',{'error':str(exc) if isinstance(exc,PipelineError) else type(exc).__name__});raise
  finally:stop.set();beat.join(timeout=2)
 
 if __name__=='__main__':
- parser=argparse.ArgumentParser();parser.add_argument('--job-id');parser.add_argument('--kind',choices=['daily_prices','discovery']);parser.add_argument('--chains',default='all');parser.add_argument('--send-report',action='store_true');parser.add_argument('--bootstrap',action='store_true');parser.add_argument('--import-snapshot',action='store_true');parser.add_argument('--import-catalog',action='store_true');parser.add_argument('--selected-links',action='store_true',help='Chỉ đọc link trong file chọn (quy chuẩn hiện tại), không quét catalog');args=parser.parse_args()
- if not(args.job_id or args.kind or args.bootstrap):parser.error('Cần job ID, kind hoặc bootstrap')
+ parser=argparse.ArgumentParser();parser.add_argument('--job-id');parser.add_argument('--pending',action='store_true');parser.add_argument('--kind',choices=['daily_prices','discovery']);parser.add_argument('--chains',default='all');parser.add_argument('--send-report',action='store_true');parser.add_argument('--bootstrap',action='store_true');parser.add_argument('--import-snapshot',action='store_true');parser.add_argument('--import-catalog',action='store_true');parser.add_argument('--selected-links',action='store_true',help='Chỉ đọc link trong file chọn (quy chuẩn hiện tại), không quét catalog');args=parser.parse_args()
+ if not(args.pending or args.job_id or args.kind or args.bootstrap):parser.error('Cần job ID, kind hoặc bootstrap')
  raise SystemExit(main(args) or 0)

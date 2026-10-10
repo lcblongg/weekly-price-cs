@@ -91,7 +91,7 @@ NEXT_PUBLIC_PUBLIC_VIEW=true
 
 `NEXT_PUBLIC_PUBLIC_VIEW=true`: `/api/comparison` trả snapshot đã công bố cho khách, chỉ xem. Bảng giá live chỉ hiện các
 model Apple trong danh sách **Sản phẩm theo dõi** (`app_settings.apple_colors`, trang `/apple-products`, chỉ admin): thêm model + màu,
-xoá model, rồi bấm "Xác minh và cập nhật giá" hoặc chờ lượt chạy hằng ngày. Thêm/xoá trên cloud cần `GITHUB_ACTIONS_TOKEN`.
+xoá model; sau khi lưu, các job tự nối áp dụng quy chuẩn → discovery → cập nhật giá. Các lượt này không gửi Telegram. Thêm/xoá trên cloud được GitHub tự nhận qua workflow `queued_jobs.yml` mỗi 10 phút khi bật production (GitHub có thể chạy trễ). `GITHUB_ACTIONS_TOKEN` là tùy chọn để dispatch ngay.
 Mọi API ghi vẫn bắt buộc admin (nút "Đăng nhập quản trị").
 Tắt: đặt `false` (hoặc xóa biến) rồi Redeploy — biến `NEXT_PUBLIC_*` chỉ có hiệu lực sau khi build lại.
 
@@ -147,3 +147,16 @@ tools/test_postgres.sh
 .venv/bin/python web/tests/test_comparison_ui.py
 .venv/bin/python tools/audit_coverage.py
 ```
+
+
+## Tự động hóa hàng đợi (10/10/2026)
+
+- `queued_jobs.yml`: kiểm tra Supabase mỗi 10 phút, chỉ cài Python/Chromium khi có yêu cầu chờ.
+- Cả hàng đợi, discovery, daily và nút xác minh dùng chung concurrency group; không hủy bot đang chạy.
+- Lưu danh sách Apple tạo job cấu hình. Khi thành công, tự xếp job discovery; discovery thành công/một phần xếp job giá.
+- Job hết lease được chuyển lỗi, giữ kết quả từng kênh đã ghi nhận. RPC không cho runner hết lease công bố.
+- Nếu một yêu cầu khác chiếm hàng đợi ở đúng lúc nối bước, job ghi `followup_warning`; không báo đã cào thành công.
+- Lịch giá 10:00 VN (03:00 UTC), discovery Chủ nhật 06:00 VN (23:00 UTC thứ Bảy).
+- FPT/PV đã trả HTTP 403 từ runner GitHub trong lượt 07/10. Không vượt chặn; giá cũ giữ thời điểm cũ.
+  Nếu vẫn bị chặn, cần runner hợp lệ khác và kiểm chứng lại; không thể cam kết 5 kênh đều có giá mới.
+- Repo hiện public; không đưa secrets hoặc artifacts nội bộ vào Git.

@@ -59,3 +59,26 @@ class CloudWorkerTests(unittest.TestCase):
   saved=db.table.return_value.upsert.call_args.args[0]['value']
   self.assertEqual(status,'success');self.assertEqual(saved['statuses']['Other'][0]['status'],'valid')
   self.assertEqual(saved['rules']['iPhone 17 Pro Max']['color'],None)
+
+ def test_pending_claim_expires_dead_leases_before_selecting_job(self):
+  db=MagicMock();db.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data=[{'id':'queued'}]
+  self.assertEqual(cw.pending_job(db),'queued')
+  db.table.return_value.update.assert_called_once()
+  update=db.table.return_value.update.call_args.args[0]
+  self.assertEqual(update['status'],'error')
+
+ def test_config_followup_discovery_then_prices_without_telegram(self):
+  for kind,payload,next_kind in [('config_update',{},'discovery'),('discovery',{'auto_prices':True},'daily_prices')]:
+   db=MagicMock();cw.followup(db,{'id':'job','kind':kind,'payload':payload},'partial',{})
+   queued=db.table.return_value.insert.call_args.args[0]
+   self.assertEqual(queued['kind'],next_kind)
+   self.assertEqual(set(queued['payload']['channels']),set(cw.CHAINS))
+   self.assertFalse(queued['payload']['send_report'])
+
+ def test_failed_step_does_not_queue_followup_and_conflict_is_visible(self):
+  db=MagicMock();job={'id':'job','kind':'config_update','payload':{}}
+  cw.followup(db,job,'error',{});db.table.assert_not_called()
+  db.table.return_value.insert.return_value.execute.side_effect=RuntimeError('busy')
+  cw.followup(db,job,'success',{})
+  saved=db.table.return_value.update.call_args.args[0]
+  self.assertIn('followup_warning',saved['result'])
