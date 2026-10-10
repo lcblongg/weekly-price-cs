@@ -16,11 +16,14 @@ import os
 # WPCS_APPLE_OUT_DIR: chạy thử cô lập (không ghi đè dữ liệu thật, không dựng lại dashboard).
 ISOLATED=bool(os.environ.get('WPCS_APPLE_OUT_DIR'))
 OUT=Path(os.environ['WPCS_APPLE_OUT_DIR'])/'cps-apple-selected' if ISOLATED else ROOT/'artifacts/cps-apple-selected'
+def catalog_parent_ids(catalog):
+ if os.environ.get('WPCS_SELECTED_ONLY')=='1':return []
+ return list(dict.fromkeys(str(r['config'].get('parent_id') or r['config'].get('variant_id')) for r in catalog if r['config'].get('brand')=='Apple' and (r['config'].get('parent_id') or r['config'].get('variant_id'))))
 async def main():
  OUT.mkdir(exist_ok=True,parents=True);catalog=json.loads((ROOT/'artifacts/full/merged/cellphones/catalog.json').read_text());config=load()
- ids=list(dict.fromkeys(str(r['config'].get('parent_id') or r['config'].get('variant_id')) for r in catalog if r['config'].get('brand')=='Apple' and (r['config'].get('parent_id') or r['config'].get('variant_id'))))
+ ids=catalog_parent_ids(catalog)
  async with client() as http:
-  if '--cached' in sys.argv:
+  if '--cached' in sys.argv and os.environ.get('WPCS_SELECTED_ONLY')!='1':
    parents=json.loads((OUT/'parents.json').read_text());children=json.loads((OUT/'children.json').read_text())
   else:
    parents={}

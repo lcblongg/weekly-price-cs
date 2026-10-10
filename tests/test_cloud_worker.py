@@ -75,6 +75,34 @@ class CloudWorkerTests(unittest.TestCase):
    self.assertEqual(set(queued['payload']['channels']),set(cw.CHAINS))
    self.assertFalse(queued['payload']['send_report'])
 
+ def test_excel_config_never_queues_discovery(self):
+  db=MagicMock();cw.followup(db,{'id':'job','kind':'config_update','payload':{'auto_followup':False}},'success',{})
+  db.table.assert_not_called()
+
+ def test_manual_links_bypass_discovery_keep_other_models_and_reject_wrong_model(self):
+  db=MagicMock();db.rpc.return_value.execute.return_value.data='run-id'
+  model='iPhone 17 Pro Max';url='https://cellphones.com.vn/iphone-17-pro-max.html'
+  row={'chain_name':'CellphoneS','sku':'cps-123','variant_id':'123','color_evidence':{'model':model,'product_code':'123','verified_at':'2026-10-07T15:00:00+07:00'},'product_name':model+' 256GB','brand':'Apple','category':'Điện thoại','model_name':model,'color':None,'promo_price':34990000,'original_price':None,'promo_text':'','source_url':url,'observed_at':'2026-10-07T15:00:00+07:00'}
+  wrong={**row,'sku':'wrong','model_name':'iPhone 16'}
+  old={'rows':[{'sku':'old','apple_model':'iPhone 16','observed_at':'2026-10-06T10:00:00+07:00','promo_price':20000000}]}
+  settings=self.settings();settings['apple_colors']['value']['products'][0]['urls']={'cellphones':[url]}
+  settings['apple_colors']['value']['products'].append({'model':'iPhone 16','color':None})
+  job={'id':'job','kind':'daily_prices','payload':{'channels':['cellphones'],'selected_links':True,'send_report':False}}
+  with tempfile.TemporaryDirectory() as temp,patch.object(cw,'ROOT',Path(temp)),patch.object(cw,'materialize_catalog') as catalog,patch.object(cw,'latest_payload',return_value=old),patch.object(cw,'run',return_value=SimpleNamespace(returncode=0)) as run:
+   catalog_path=Path(temp)/'artifacts/full/merged/cellphones/catalog.json';catalog_path.parent.mkdir(parents=True);catalog_path.write_text('["previous catalog"]')
+   folder=Path(temp)/'out/jobs/job/apple/cellphones/cps-apple-selected';folder.mkdir(parents=True)
+   for name,data in [('prices.json',[row,wrong]),('issues.json',[]),('summary.json',{'models':[]})]:(folder/name).write_text(json.dumps(data))
+   result,status=cw.work(db,job,settings)
+   catalog.assert_not_called();self.assertEqual(catalog_path.read_text(),'["previous catalog"]')
+   run.assert_called_once();self.assertEqual(run.call_args.args[1]['WPCS_SELECTED_ONLY'],'1')
+   chosen=json.loads((Path(temp)/'out/jobs/job/config/cellphones.json').read_text())
+   self.assertEqual([r['model'] for r in chosen['products']],[model])
+  self.assertEqual(status,'partial');self.assertEqual(result['channels']['cellphones']['priced'],1)
+  args=db.rpc.call_args.args[1]
+  self.assertIsNone(args['p_catalog_run']);self.assertEqual(args['p_rows'],[row])
+  self.assertEqual(args['p_payload']['rows'][1],old['rows'][0])
+  self.assertIn('chưa xác minh',args['p_issues'][0]['reason'])
+
  def test_failed_step_does_not_queue_followup_and_conflict_is_visible(self):
   db=MagicMock();job={'id':'job','kind':'config_update','payload':{}}
   cw.followup(db,job,'error',{});db.table.assert_not_called()

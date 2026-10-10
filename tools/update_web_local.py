@@ -41,21 +41,21 @@ def wait_for_idle(db, channels, seconds, sleep=time.sleep, clock=time.monotonic)
         sleep(10)
 
 
-def create_job(db, kind, channels):
+def create_job(db, kind, channels, payload=None):
     # Unique index trong DB là khóa cuối cùng nếu runner khác khởi chạy đúng lúc này.
     job_id = str(uuid.uuid4())
     db.table('automation_jobs').insert({
         'id': job_id, 'kind': kind,
-        'payload': {'channels': channels, 'send_report': False, 'source': 'local_mac'},
+        'payload': {**(payload or {}), 'channels': channels, 'send_report': False, 'source': 'local_mac'},
         'lease_until': (datetime.now(TZ) + timedelta(hours=6)).isoformat(),
     }).execute()
     return job_id
 
 
-def run_job(db, kind, channels, wait_seconds):
+def run_job(db, kind, channels, wait_seconds, payload=None):
     wait_for_idle(db, channels, wait_seconds)
     try:
-        job_id = create_job(db, kind, channels)
+        job_id = create_job(db, kind, channels) if payload is None else create_job(db, kind, channels, payload)
     except Exception:
         raise PipelineError('Một runner khác vừa nhận hàng đợi hoặc DB từ chối yêu cầu; chưa chạy bot. Thử lại sau.') from None
     folder = ROOT / 'out/local-web' / job_id

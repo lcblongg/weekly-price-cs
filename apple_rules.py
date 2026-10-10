@@ -125,6 +125,11 @@ def _validate_products(products):
     return clean
 
 
+def validate_products(products):
+    """Xác thực đầu vào Excel/API; chưa thay đổi quy tắc nhận diện model."""
+    return _validate_products(products)
+
+
 def plan(products, models_config, renames=(), current=()):
     """Trả về (colors_config, models_config) mới. Không ghi file.
 

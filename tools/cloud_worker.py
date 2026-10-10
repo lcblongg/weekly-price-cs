@@ -111,14 +111,22 @@ def work(db,job,settings):
    if kind=='discovery':
     result=run(['discover_products.py','--chain',slug,'--out','out/discovery','--json-only']);summary=read(ROOT/f'out/discovery/{slug}/summary.json',{})
     return {'label':LABELS[slug],'status':'success' if result.returncode==0 and summary.get('published') else 'error','reason':summary.get('message',''),'sources':summary.get('sources'),'sources_ok':summary.get('sources_ok')}
-   meta=materialize_catalog(db,slug);old=latest_payload(db,slug)
+   if payload.get('selected_links'):
+    # Link nhập trong Excel/URL quản trị là đầu vào; không phụ thuộc catalog discovery.
+    folder=ROOT/f'artifacts/full/merged/{slug}';folder.mkdir(parents=True,exist_ok=True)
+    if not (folder/'catalog.json').exists():(folder/'catalog.json').write_text('[]')
+    meta={'run_id':None,'ready':0,'total':0,'review':0}
+   else:meta=materialize_catalog(db,slug)
+   old=latest_payload(db,slug)
    chosen=prefs
    if kind=='verify_prices':
     rule=next((r for r in prefs['products'] if r['model']==payload['model']),None)
     if not rule:raise PipelineError('Model không còn trong quy chuẩn')
     chosen={**prefs,'products':[rule]}
-   conf=ROOT/f'out/config/{slug}.json';conf.parent.mkdir(parents=True,exist_ok=True);conf.write_text(json.dumps(chosen,ensure_ascii=False))
-   out=ROOT/f'out/apple/{slug}';env={**os.environ,'WPCS_APPLE_COLORS':str(conf),'WPCS_APPLE_OUT_DIR':str(out)}
+   if payload.get('selected_links'):chosen={**chosen,'products':[r for r in chosen['products'] if r.get('urls',{}).get(slug)]}
+   scope=ROOT/f'out/jobs/{job["id"]}' if payload.get('selected_links') else ROOT/'out'
+   conf=scope/f'config/{slug}.json';conf.parent.mkdir(parents=True,exist_ok=True);conf.write_text(json.dumps(chosen,ensure_ascii=False))
+   out=scope/f'apple/{slug}';env={**os.environ,'WPCS_APPLE_COLORS':str(conf),'WPCS_APPLE_OUT_DIR':str(out)}
    if payload.get('selected_links'):env['WPCS_SELECTED_ONLY']='1'  # chỉ đọc đúng link trong file chọn
    command=COMMANDS[slug]+([payload['model']] if slug=='tgdd' and kind=='verify_prices' else [])
    result=run(command,env);selected=out/FOLDERS[slug];raw=read(selected/'prices.json',[]);issues=read(selected/'issues.json',[]);summary=read(selected/'summary.json',{})
@@ -135,6 +143,13 @@ def work(db,job,settings):
     raw=generic+raw
    from tools.apple_job import valid_row
    rules={r['model']:r for r in chosen['products']}
+   if payload.get('selected_links'):
+    verified=[]
+    for r in raw:
+     rule=rules.get(r.get('model_name'))
+     if rule and valid_row(r,rule):verified.append(r)
+     else:issues.append({'stage':'price','chain_name':CHAINS[slug],'sku':r.get('sku',''),'source_url':r.get('source_url',''),'reason':'Link nhập tay chưa xác minh đúng model/SKU/màu; không công bố giá.'})
+    raw=verified
    raw=[r for r in raw if r.get('brand')!='Apple' or r.get('model_name') not in rules or valid_row(r,rules[r['model_name']])]
    raw=list({r['sku']:r for r in raw}.values())
    # Lưu cả màu/SKU ngoài quy chuẩn vào lịch sử nguồn; chỉ dashboard chọn màu theo cấu hình.
@@ -145,7 +160,7 @@ def work(db,job,settings):
    retained=[]
    for r in old.get('rows',[]):
     if r['sku'] in keys:continue
-    if kind=='verify_prices' and r['apple_model']!=target:retained.append(r)
+    if (kind=='verify_prices' and r['apple_model']!=target) or (payload.get('selected_links') and r['apple_model'] not in rules):retained.append(r)
     else:retained.append({**r,'stale_since':datetime.now(TZ).isoformat(),'stale_reason':'Lượt mới chưa xác minh lại được SKU; giữ giá và thời điểm cũ.'})
    if not fresh and not stored:
     why='Không có giá/trạng thái nào xác minh thành công; giữ dữ liệu cũ'
@@ -153,7 +168,7 @@ def work(db,job,settings):
     return {'label':LABELS[slug],'status':'error','reason':why,'priced':0,'status_only':0,'needs_check':len(issues),'published':False}
    if not fresh:issues.append({'chain_name':CHAINS[slug],'stage':'price','source_url':stored[0]['source_url'],'reason':'Đã lưu giá nguồn nhưng chưa xác minh lại được giá theo màu cấu hình; dashboard giữ dữ liệu cũ.'})
    issues=list({(i.get('source_url'),i.get('sku') or ''):i for i in issues}.values())
-   source={'slug':slug,'label':LABELS[slug],'updated':max(r['observed_at'] for r in (fresh or stored)),'issues':len(issues),'models':summary.get('models',[]),'discovery':f"{meta['ready']}/{meta['total']} link khóa SKU",'warning':f"{meta['review']} link catalog cần kiểm tra" if meta['review'] else None}
+   source={'slug':slug,'label':LABELS[slug],'updated':max(r['observed_at'] for r in (fresh or stored)),'issues':len(issues),'models':summary.get('models',[]),'discovery':f"{sum(len(r.get('urls',{}).get(slug,[])) for r in chosen['products'])} link nhập tay" if payload.get('selected_links') else f"{meta['ready']}/{meta['total']} link khóa SKU",'warning':f"{meta['review']} link catalog cần kiểm tra" if meta['review'] else None}
    # Reporter hiện có đọc bảng daily_prices/summary. Không trộn SKU cũ vào lượt mới.
    year,week=weeks()[0];run_id=db.rpc('commit_dashboard_run',{'p_job':job['id'],'p_chain':CHAINS[slug],'p_payload':{'rows':fresh+retained,'issues':[{**i,'slug':slug,'chain':LABELS[slug]} for i in issues],'source':source},'p_date':datetime.now(TZ).date().isoformat(),'p_revision':revision,'p_year':year,'p_week':week,'p_rows':stored,'p_issues':issues,'p_catalog_run':meta['run_id']}).execute().data
    report_dir=ROOT/f'out/report-prices/{slug}';report_dir.mkdir(parents=True,exist_ok=True)
@@ -192,7 +207,7 @@ def pending_job(db):
 
 def followup(db,job,status,result):
  """Nối lưu quy chuẩn → discovery → giá; mỗi bước một job, chung khóa DB."""
- if status not in ('success','partial'):return
+ if status not in ('success','partial') or job['payload'].get('auto_followup') is False:return
  kind='discovery' if job['kind']=='config_update' else 'daily_prices' if job['kind']=='discovery' and job['payload'].get('auto_prices') else None
  if not kind:return
  payload={'channels':job['payload'].get('channels') or list(CHAINS),'send_report':False,'auto_prices':kind=='discovery'}

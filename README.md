@@ -1,4 +1,5 @@
 > Mã local hiện ở `weekly-price-cs/Data/`. Cloud: xem `docs/production-runbook.md`.
+> Luồng đơn giản trên Mac: điền 5 cột link vào `weekly-price-cs/data.xlsx`, bấm **Chay bot.command**. [Hướng dẫn một file](docs/data-file-bot.md). Không discovery/chụp ảnh/Telegram trong lượt này.
 > Hàng đợi quản trị được GitHub kiểm tra mỗi 10 phút; lưu quy chuẩn Apple tự nối discovery và cập nhật giá.
 > Việc chạy theo lịch phụ thuộc `PRODUCTION_ENABLED`; không coi HTTP 403 hoặc job bị hủy là thành công.
 
